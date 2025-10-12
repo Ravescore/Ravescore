@@ -17,26 +17,18 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    /* Basic custom styles */
     body { font-family: 'Montserrat', sans-serif; margin:0; min-height:100vh; }
     .title-font { font-family: 'Bebas Neue', cursive; letter-spacing: .02em; }
-
-    /* Vanta container: fixed, full viewport, allow mouse events through to page */
     #vanta-bg {
       position: fixed;
-      inset: 0;               /* top:0; right:0; bottom:0; left:0; */
+      inset: 0;
       z-index: 0;
-      pointer-events: none;   /* so underlying UI remains interactive */
+      pointer-events: none;
       width: 100%;
       height: 100vh;
     }
-
-    /* Put all page content above the Vanta canvas */
     .site-content { position: relative; z-index: 10; }
-
-    /* Warning style: use Tailwind class animate-pulse instead of custom keyframes,
-       but keep a slightly stronger baseline style for contrast / readability. */
-    .warning-box { background: rgba(220, 38, 38, 0.95); } /* red-600 */
+    .warning-box { background: rgba(220, 38, 38, 0.95); }
   </style>
 </head>
 <body class="bg-black text-white">
@@ -53,18 +45,17 @@
         <h1 class="title-font text-3xl tracking-wide">RAVESCORE</h1>
       </div>
 
-      <nav aria-label="Primary" class="">
+      <nav aria-label="Primary">
         <ul class="flex space-x-6">
-          <li><a href="#" class="hover:text-red-500 transition focus:outline focus:outline-2 focus:outline-offset-2">Work</a></li>
-          <li><a href="#" class="hover:text-red-500 transition focus:outline focus:outline-2 focus:outline-offset-2">About</a></li>
-          <li><a href="#" class="hover:text-red-500 transition focus:outline focus:outline-2 focus:outline-offset-2">Contact</a></li>
+          <li><a href="#work" class="hover:text-red-500 transition focus:outline focus:outline-2 focus:outline-offset-2">Work</a></li>
+          <li><a href="#about" class="hover:text-red-500 transition focus:outline focus:outline-2 focus:outline-offset-2">About</a></li>
+          <li><a href="#contact" class="hover:text-red-500 transition focus:outline focus:outline-2 focus:outline-offset-2">Contact</a></li>
         </ul>
       </nav>
     </header>
 
     <main class="flex-grow flex items-center justify-center px-4">
       <div class="text-center max-w-4xl mx-auto">
-        <!-- Use Tailwind animate-pulse class directly (no JS toggling) -->
         <div class="warning-box animate-pulse text-white px-6 py-4 rounded-lg mb-8 inline-block">
           <div class="flex items-center justify-center space-x-2">
             <span data-feather="alert-triangle" class="w-6 h-6" aria-hidden="true"></span>
@@ -75,43 +66,105 @@
             Viewer discretion is advised for your comfort and safety.
           </p>
         </div>
-
         <h2 class="title-font text-5xl md:text-7xl mb-6">IMMERSIVE VISUAL EXPERIENCES</h2>
         <p class="text-xl mb-8 opacity-90">
           We craft boundary-pushing digital content that captivates and engages audiences worldwide.
         </p>
-
         <div class="flex justify-center space-x-4">
-          <button class="bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition transform hover:scale-105 focus:outline focus:outline-2">
-            Explore Our Work
-          </button>
-          <button class="border-2 border-white px-8 py-3 rounded-full font-bold hover:bg-white hover:text-black transition transform hover:scale-105 focus:outline focus:outline-2">
-            Get In Touch
-          </button>
+          <a href="#work">
+            <button class="bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition transform hover:scale-105 focus:outline focus:outline-2">
+              Explore Our Work
+            </button>
+          </a>
+          <a href="#contact">
+            <button class="border-2 border-white px-8 py-3 rounded-full font-bold hover:bg-white hover:text-black transition transform hover:scale-105 focus:outline focus:outline-2">
+              Get In Touch
+            </button>
+          </a>
         </div>
       </div>
     </main>
 
+    <!-- Work Section -->
+    <section id="work" class="py-16 bg-black text-white">
+      <h3 class="title-font text-3xl md:text-5xl mb-10 text-center">Featured Work</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
+        <!-- Example project card -->
+        <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden group">
+          <img src="path/to/project1.jpg" alt="Project 1" class="w-full h-48 object-cover group-hover:scale-105 transition">
+          <div class="p-6">
+            <h4 class="font-bold text-xl mb-2">Project One</h4>
+            <p class="opacity-80 mb-4">Generative visuals for an electronic music event, blending light and motion.</p>
+            <a href="#" class="text-red-500 hover:underline font-semibold">View Details →</a>
+          </div>
+        </div>
+        <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden group">
+          <img src="path/to/project2.jpg" alt="Project 2" class="w-full h-48 object-cover group-hover:scale-105 transition">
+          <div class="p-6">
+            <h4 class="font-bold text-xl mb-2">Project Two</h4>
+            <p class="opacity-80 mb-4">Interactive installation exploring the intersection of sound and space.</p>
+            <a href="#" class="text-red-500 hover:underline font-semibold">View Details →</a>
+          </div>
+        </div>
+        <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden group">
+          <img src="path/to/project3.jpg" alt="Project 3" class="w-full h-48 object-cover group-hover:scale-105 transition">
+          <div class="p-6">
+            <h4 class="font-bold text-xl mb-2">Project Three</h4>
+            <p class="opacity-80 mb-4">Digital branding assets for a global creative campaign.</p>
+            <a href="#" class="text-red-500 hover:underline font-semibold">View Details →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-black text-white border-t border-gray-800">
+      <div class="max-w-3xl mx-auto px-4 text-center">
+        <h3 class="title-font text-3xl md:text-5xl mb-6">About Ravescore</h3>
+        <p class="text-lg opacity-80 mb-4">
+          Ravescore is an independent studio specializing in immersive visual experiences and digital content. Our multi-disciplinary team blends art, technology, and storytelling to create impactful work for audiences worldwide.
+        </p>
+        <p class="opacity-60 mb-6">
+          From live events and installations to interactive media and branding, we push boundaries and redefine what's possible. Driven by curiosity and collaboration, we turn ideas into captivating realities.
+        </p>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-black text-white border-t border-gray-800">
+      <div class="max-w-xl mx-auto px-4">
+        <h3 class="title-font text-3xl md:text-5xl mb-6 text-center">Contact Us</h3>
+        <form class="space-y-6">
+          <div>
+            <label for="name" class="block text-left mb-1 font-semibold">Name</label>
+            <input type="text" id="name" name="name" required class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2">
+          </div>
+          <div>
+            <label for="email" class="block text-left mb-1 font-semibold">Email</label>
+            <input type="email" id="email" name="email" required class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2">
+          </div>
+          <div>
+            <label for="message" class="block text-left mb-1 font-semibold">Message</label>
+            <textarea id="message" name="message" rows="5" required class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2"></textarea>
+          </div>
+          <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-full transition w-full">Send Message</button>
+        </form>
+        <p class="mt-6 text-center opacity-60">Or email us at <a href="mailto:hello@ravescore.com" class="text-red-400 hover:underline">hello@ravescore.com</a></p>
+      </div>
+    </section>
+
     <footer class="container mx-auto px-4 py-6 text-center opacity-75 text-sm">
       <p>© 2025 Ravescore. All rights reserved.</p>
     </footer>
-
   </div>
 
   <!-- Libraries (loaded at end for performance) -->
   <script src="https://unpkg.com/feather-icons"></script>
-
-  <!-- THREE.js (required by Vanta) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="" crossorigin="anonymous"></script>
-
-  <!-- Vanta (waves) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
 
   <script>
-    // Replace feather icons after DOM load
     feather.replace();
-
-    // Initialize Vanta (safe to run here because three.js + vanta script are loaded)
     if (typeof VANTA !== 'undefined') {
       VANTA.WAVES({
         el: "#vanta-bg",
@@ -132,6 +185,5 @@
       console.warn('VANTA library not loaded.');
     }
   </script>
-
 </body>
 </html>
