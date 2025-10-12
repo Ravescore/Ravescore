@@ -1,122 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ravescore - Visual Experience Studio</title>
-    <link rel="icon" type="image/x-icon" href="your-image-url.jpg">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700&display=swap');
-        
-        body {
-            font-family: 'Montserrat', sans-serif;
-            overflow-x: hidden;
-        }
-        
-        .title-font {
-            font-family: 'Bebas Neue', cursive;
-        }
-        
-        .warning-flash {
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; }
-            100% { opacity: 0.8; }
-        }
-        
-        .vanta-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Ravescore — immersive visual experiences and digital content studio." />
+  <title>Ravescore - Visual Experience Studio</title>
+
+  <!-- Favicon (replace with your real icon) -->
+  <link rel="icon" type="image/x-icon" href="path/to/your-favicon.ico">
+
+  <!-- Google fonts (prefer link over @import for performance) -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CDN (fine for prototypes) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Basic custom styles */
+    body { font-family: 'Montserrat', sans-serif; margin:0; min-height:100vh; }
+    .title-font { font-family: 'Bebas Neue', cursive; letter-spacing: .02em; }
+
+    /* Vanta container: fixed, full viewport, allow mouse events through to page */
+    #vanta-bg {
+      position: fixed;
+      inset: 0;               /* top:0; right:0; bottom:0; left:0; */
+      z-index: 0;
+      pointer-events: none;   /* so underlying UI remains interactive */
+      width: 100%;
+      height: 100vh;
+    }
+
+    /* Put all page content above the Vanta canvas */
+    .site-content { position: relative; z-index: 10; }
+
+    /* Warning style: use Tailwind class animate-pulse instead of custom keyframes,
+       but keep a slightly stronger baseline style for contrast / readability. */
+    .warning-box { background: rgba(220, 38, 38, 0.95); } /* red-600 */
+  </style>
 </head>
-<body class="bg-black text-white min-h-screen flex flex-col">
-    <div id="vanta-bg" class="vanta-bg"></div>
-    
+<body class="bg-black text-white">
+
+  <!-- Vanta canvas container -->
+  <div id="vanta-bg" aria-hidden="true"></div>
+
+  <div class="site-content flex flex-col min-h-screen">
+
     <header class="container mx-auto px-4 py-8 flex justify-between items-center">
-        <div class="flex items-center space-x-3">
-            <img src="your-image-url.jpg" alt="Ravescore Logo" class="h-12 w-auto rounded-md shadow-lg">
-            <h1 class="title-font text-3xl">RAVESCORE</h1>
-        </div>
-        <nav>
-            <ul class="flex space-x-6">
-                <li><a href="#" class="hover:text-red-500 transition">Work</a></li>
-                <li><a href="#" class="hover:text-red-500 transition">About</a></li>
-                <li><a href="#" class="hover:text-red-500 transition">Contact</a></li>
-            </ul>
-        </nav>
+      <div class="flex items-center space-x-3">
+        <!-- replace with your logo path -->
+        <img src="path/to/your-logo.png" alt="Ravescore logo" class="h-12 w-auto rounded-md shadow-lg">
+        <h1 class="title-font text-3xl tracking-wide">RAVESCORE</h1>
+      </div>
+
+      <nav aria-label="Primary" class="">
+        <ul class="flex space-x-6">
+          <li><a href="#" class="hover:text-red-500 transition focus:outline focus:outline-2 focus:outline-offset-2">Work</a></li>
+          <li><a href="#" class="hover:text-red-500 transition focus:outline focus:outline-2 focus:outline-offset-2">About</a></li>
+          <li><a href="#" class="hover:text-red-500 transition focus:outline focus:outline-2 focus:outline-offset-2">Contact</a></li>
+        </ul>
+      </nav>
     </header>
 
     <main class="flex-grow flex items-center justify-center px-4">
-        <div class="text-center max-w-4xl mx-auto">
-            <div class="warning-flash bg-red-600 text-white px-6 py-4 rounded-lg mb-8 inline-block">
-                <div class="flex items-center justify-center space-x-2">
-                    <i data-feather="alert-triangle" class="w-6 h-6"></i>
-                    <span class="font-bold">PHOTOSENSITIVITY WARNING</span>
-                </div>
-                <p class="mt-2 text-sm max-w-md">
-                    This experience may contain flashing lights and rapidly changing images. 
-                    Viewer discretion is advised for your comfort and safety.
-                </p>
-            </div>
-            
-            <h2 class="title-font text-5xl md:text-7xl mb-6">IMMERSIVE VISUAL EXPERIENCES</h2>
-            <p class="text-xl mb-8 opacity-90">
-                We craft boundary-pushing digital content that captivates and engages audiences worldwide.
-            </p>
-            
-            <div class="flex justify-center space-x-4">
-                <button class="bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition transform hover:scale-105">
-                    Explore Our Work
-                </button>
-                <button class="border-2 border-white px-8 py-3 rounded-full font-bold hover:bg-white hover:text-black transition transform hover:scale-105">
-                    Get In Touch
-                </button>
-            </div>
+      <div class="text-center max-w-4xl mx-auto">
+        <!-- Use Tailwind animate-pulse class directly (no JS toggling) -->
+        <div class="warning-box animate-pulse text-white px-6 py-4 rounded-lg mb-8 inline-block">
+          <div class="flex items-center justify-center space-x-2">
+            <span data-feather="alert-triangle" class="w-6 h-6" aria-hidden="true"></span>
+            <span class="font-bold">PHOTOSENSITIVITY WARNING</span>
+          </div>
+          <p class="mt-2 text-sm max-w-md mx-auto">
+            This experience may contain flashing lights and rapidly changing images.
+            Viewer discretion is advised for your comfort and safety.
+          </p>
         </div>
+
+        <h2 class="title-font text-5xl md:text-7xl mb-6">IMMERSIVE VISUAL EXPERIENCES</h2>
+        <p class="text-xl mb-8 opacity-90">
+          We craft boundary-pushing digital content that captivates and engages audiences worldwide.
+        </p>
+
+        <div class="flex justify-center space-x-4">
+          <button class="bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-200 transition transform hover:scale-105 focus:outline focus:outline-2">
+            Explore Our Work
+          </button>
+          <button class="border-2 border-white px-8 py-3 rounded-full font-bold hover:bg-white hover:text-black transition transform hover:scale-105 focus:outline focus:outline-2">
+            Get In Touch
+          </button>
+        </div>
+      </div>
     </main>
 
     <footer class="container mx-auto px-4 py-6 text-center opacity-75 text-sm">
-        <p>© 2025 Ravescore. All rights reserved.</p>
+      <p>© 2025 Ravescore. All rights reserved.</p>
     </footer>
 
-    <script>
-        feather.replace();
-        
-        VANTA.WAVES({
-            el: "#vanta-bg",
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200.00,
-            minWidth: 200.00,
-            scale: 1.00,
-            scaleMobile: 1.00,
-            color: 0x1a1a1a,
-            shininess: 0.00,
-            waveHeight: 20.00,
-            waveSpeed: 0.25,
-            zoom: 0.65
-        });
-        
-        // Add flashing effect to warning periodically
-        setInterval(() => {
-            const warning = document.querySelector('.warning-flash');
-            warning.classList.add('animate-pulse');
-            setTimeout(() => {
-                warning.classList.remove('animate-pulse');
-            }, 1000);
-        }, 5000);
-    </script>
+  </div>
+
+  <!-- Libraries (loaded at end for performance) -->
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  <!-- THREE.js (required by Vanta) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="" crossorigin="anonymous"></script>
+
+  <!-- Vanta (waves) -->
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
+
+  <script>
+    // Replace feather icons after DOM load
+    feather.replace();
+
+    // Initialize Vanta (safe to run here because three.js + vanta script are loaded)
+    if (typeof VANTA !== 'undefined') {
+      VANTA.WAVES({
+        el: "#vanta-bg",
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.00,
+        minWidth: 200.00,
+        scale: 1.00,
+        scaleMobile: 1.00,
+        color: 0x1a1a1a,
+        shininess: 0.00,
+        waveHeight: 20.00,
+        waveSpeed: 0.25,
+        zoom: 0.65
+      });
+    } else {
+      console.warn('VANTA library not loaded.');
+    }
+  </script>
+
 </body>
 </html>
