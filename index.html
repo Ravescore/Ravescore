@@ -17,6 +17,16 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Prevent header from covering section titles */
+    section {
+      scroll-margin-top: 120px; /* adjust according to header height */
+    }
+
     body { font-family: 'Montserrat', sans-serif; margin:0; min-height:100vh; }
     .title-font { font-family: 'Bebas Neue', cursive; letter-spacing: .02em; }
     #vanta-bg {
@@ -38,7 +48,7 @@
 
   <div class="site-content flex flex-col min-h-screen">
 
-    <header class="container mx-auto px-4 py-8 flex justify-between items-center">
+    <header class="container mx-auto px-4 py-8 flex justify-between items-center fixed w-full top-0 bg-black z-20">
       <div class="flex items-center space-x-3">
         <!-- replace with your logo path -->
         <img src="path/to/your-logo.png" alt="Ravescore logo" class="h-12 w-auto rounded-md shadow-lg">
@@ -54,7 +64,7 @@
       </nav>
     </header>
 
-    <main class="flex-grow flex items-center justify-center px-4">
+    <main class="flex-grow flex items-center justify-center px-4 pt-32">
       <div class="text-center max-w-4xl mx-auto">
         <div class="warning-box animate-pulse text-white px-6 py-4 rounded-lg mb-8 inline-block">
           <div class="flex items-center justify-center space-x-2">
@@ -148,7 +158,7 @@
           </div>
           <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-full transition w-full">Send Message</button>
         </form>
-        <p class="mt-6 text-center opacity-60">Or email us at <a href="cookies.development1@gmail.com" class="text-red-400 hover:underline">hello@ravescore.com</a></p>
+        <p class="mt-6 text-center opacity-60">Or email us at <a href="mailto:hello@ravescore.com" class="text-red-400 hover:underline">hello@ravescore.com</a></p>
       </div>
     </section>
 
@@ -185,4 +195,4 @@
     }
   </script>
 </body>
-  </html>
+          </html>
