@@ -218,17 +218,6 @@
         };
       }
 
-  <script>
-    function sendMail(email, subject, message) {
-      const to = email;
-      const subject = subject;
-      const body = message;
-
-      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
-      window.open(gmailUrl, '_blank');
-    }
-  </script>
-
       form.addEventListener('submit', function (e) {
         e.preventDefault();
         hideAll();
