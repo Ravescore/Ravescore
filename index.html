@@ -118,24 +118,154 @@
 
     <!-- Contact Section -->
     <section id="contact" class="py-16 bg-black text-white border-t border-gray-800">
-      <div class="max-w-xl mx-auto px-4">
-        <h3 class="title-font text-3xl md:text-5xl mb-6 text-center">Contact Us</h3>
-        <form class="space-y-6">
-          <div>
-            <label for="name" class="block text-left mb-1 font-semibold">Name</label>
-            <input type="text" id="name" name="name" required class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2">
-          </div>
-          <div>
-            <label for="email" class="block text-left mb-1 font-semibold">Email</label>
-            <input type="email" id="email" name="email" required class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2">
-          </div>
-          <div>
-            <label for="message" class="block text-left mb-1 font-semibold">Message</label>
-            <textarea id="message" name="message" rows="5" required class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2"></textarea>
-          </div>
-          <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-full transition w-full">(COMMING SOON!) Send Message</button>
-        </form>
-        <p class="mt-6 text-center opacity-60">Or email us at <a href="cookies.development1@gmail.com" class="text-red-400 hover:underline">cookies.development1@gmail.com</a></p>
+  <div class="max-w-xl mx-auto px-4">
+    <h3 class="title-font text-3xl md:text-5xl mb-6 text-center">Contact Us</h3>
+    
+    <div id="contact-success" class="hidden mb-4 rounded-md p-3 text-green-900 bg-green-100" role="status" aria-live="polite"></div>
+    <div id="contact-error" class="hidden mb-4 rounded-md p-3 text-red-900 bg-red-100" role="alert" aria-live="assertive"></div>
+
+    <form id="contact-form-mailto" class="space-y-6" novalidate>
+      <div>
+        <label for="name" class="block text-left mb-1 font-semibold">Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          required
+          placeholder="Your name"
+          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2 focus:outline-red-600"
+        >
+      </div>
+
+      <div>
+        <label for="email" class="block text-left mb-1 font-semibold">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          required
+          placeholder="Your email"
+          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2 focus:outline-red-600"
+        >
+      </div>
+
+      <div>
+        <label for="message" class="block text-left mb-1 font-semibold">Message</label>
+        <textarea
+          id="message"
+          name="message"
+          rows="5"
+          required
+          placeholder="Your message"
+          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2 focus:outline-red-600"
+        ></textarea>
+      </div>
+
+      <button id="contact-submit-mailto" type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-full transition w-full">
+        Send Message
+      </button>
+    </form>
+
+    <p class="mt-6 text-center opacity-60">
+      Or email us at
+      <a id="plain-mail-link" href="mailto:cookies.development1@gmail.com" class="text-red-400 hover:underline">cookies.development1@gmail.com</a>
+    </p>
+
+    <!-- Manual fallback UI -->
+    <div id="manual-fallback" class="mt-4 text-center hidden">
+      <p class="mb-2 text-sm opacity-70">If your mail client didn't open, you can:</p>
+      <a id="manual-mailto-link" class="inline-block mb-2 text-red-400 hover:underline" href="#" target="_blank" rel="noopener">Click here to compose manually</a>
+      <div>
+        <button id="copy-msg-btn" class="text-sm px-3 py-2 border border-gray-700 rounded-md hover:bg-gray-800">Copy message to clipboard</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const FORM_RECIPIENT = 'cookies.development1@gmail.com';
+      const form = document.getElementById('contact-form-mailto');
+      const submitBtn = document.getElementById('contact-submit-mailto');
+      const successBox = document.getElementById('contact-success');
+      const errorBox = document.getElementById('contact-error');
+      const manualFallback = document.getElementById('manual-fallback');
+      const manualMailtoLink = document.getElementById('manual-mailto-link');
+      const copyBtn = document.getElementById('copy-msg-btn');
+
+      function hideAll() {
+        successBox.classList.add('hidden');
+        errorBox.classList.add('hidden');
+        manualFallback.classList.add('hidden');
+      }
+
+      function showError(text) {
+        errorBox.textContent = text;
+        errorBox.classList.remove('hidden');
+      }
+
+      function showSuccess(text) {
+        successBox.textContent = text;
+        successBox.classList.remove('hidden');
+      }
+
+      function buildMailto(name, email, message) {
+        const subject = encodeURIComponent('Ravescore contact from ' + name);
+        const bodyText = `Name: ${name}\nEmail: ${email}\n\n${message}`;
+        const body = encodeURIComponent(bodyText);
+        return {
+          uri: `mailto:${FORM_RECIPIENT}?subject=${subject}&body=${body}`,
+          plainBody: bodyText
+        };
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        hideAll();
+
+        const name = (form.name.value || '').trim();
+        const email = (form.email.value || '').trim();
+        const message = (form.message.value || '').trim();
+
+        if (!name || !email || !message) {
+          showError('Please fill in all fields.');
+          return;
+        }
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+          showError('Please enter a valid email address.');
+          return;
+        }
+        const { uri, plainBody } = buildMailto(name, email, message);
+        const tempLink = document.createElement('a');
+        tempLink.href = uri;
+        tempLink.style.display = 'none';
+        document.body.appendChild(tempLink);
+
+        try {
+          tempLink.click();
+          document.body.removeChild(tempLink);
+
+          showSuccess('Your email client should open now. Please review the message and press Send.');
+          manualMailtoLink.href = uri;
+          manualFallback.classList.remove('hidden');
+          copyBtn.onclick = async function () {
+            try {
+              await navigator.clipboard.writeText(plainBody);
+              showSuccess('Message copied to clipboard — paste it into your email client and send.');
+            } catch (err) {
+              showError('Unable to copy to clipboard. Please manually select and copy the message.');
+            }
+          };
+        } catch (err) {
+          document.body.removeChild(tempLink);
+          showError('Unable to open your mail client automatically.');
+          manualMailtoLink.href = uri;
+          manualFallback.classList.remove('hidden');
+        }
+      });
+    })();
+  </script>
+</section>
       </div>
     </section>
     <footer class="container mx-auto px-4 py-6 text-center opacity-75 text-sm">
