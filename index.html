@@ -213,10 +213,8 @@
         const bodyText = `Name: ${name}\nEmail: ${email}\n\n${message}`;
         const body = encodeURIComponent(bodyText);
         return {
-          const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
+          uri: `mailto:${FORM_RECIPIENT}?subject=${subject}&body=${body}`,
           plainBody: bodyText
-          //uri: `mailto:${FORM_RECIPIENT}?subject=${subject}&body=${body}`,
-          //plainBody: bodyText
         };
       }
 
