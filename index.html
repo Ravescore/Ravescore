@@ -24,7 +24,7 @@
 
     /* Prevent header from covering section titles */
     section {
-      scroll-margin-top: 170px; /* adjust according to header height */
+      scroll-margin-top: 100px; /* adjust according to header height */
     }
 
     body { font-family: 'Montserrat', sans-serif; margin:0; min-height:100vh; }
@@ -34,7 +34,7 @@
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      width: 150%;
+      width: 100%;
       height: 100vh;
     }
     .site-content { position: relative; z-index: 10; }
@@ -48,7 +48,7 @@
 
   <div class="site-content flex flex-col min-h-screen">
 
-    <header class="container mx-auto px-4 py-8 flex justify-between items-center fixed w-full top-0 bg-black z-20">
+    <header class="container mx-auto px-4 py-8 flex justify-between items-center fixed w-full top-0 bg-black z-0">
       <div class="flex items-center space-x10">
         <!-- replace with your logo path -->
         <img src="1000020118.jpg" alt="Ravescore logo" class="h-12 w-auto rounded-md shadow-lg">
