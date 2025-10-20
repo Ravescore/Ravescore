@@ -1,7 +1,8 @@
 <!doctype html>
 <html lang=en>
 <head>
-    <!-- ✨ RAVESCORE INTRO ANIMATION ✨ -->
+<meta charset=utf-8>
+      <!-- ✨ RAVESCORE INTRO ANIMATION ✨ -->
   <div id="intro-screen" class="fixed inset-0 bg-black flex items-center justify-center z-[9999] overflow-hidden">
     <div class="relative">
       <div class="absolute inset-0 rounded-full bg-red-600 blur-3xl opacity-30 animate-pulse-slow"></div>
@@ -39,8 +40,20 @@
     setTimeout(() => {
       intro.style.opacity = "0";
 
-                          </script>
-<meta charset=utf-8>
+      // Fade out sound smoothly
+      const fadeAudio = setInterval(() => {
+        if (sound.volume > 0.05) {
+          sound.volume -= 0.05;
+        } else {
+          sound.pause();
+          clearInterval(fadeAudio);
+        }
+      }, 50);
+
+      setTimeout(() => intro.remove(), 800);
+    }, 2800);
+  });
+  </script>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <meta name=description content="Ravescore — immersive visual experiences and digital content studio.">
 <title>Ravescore - Under Maintenance</title>
