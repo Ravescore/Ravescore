@@ -43,7 +43,7 @@
     }
 
     /* Music control UI */
-    /* Side pause button (only visible when playing) */
+    /* Side pause button (only visible when playing) - stays bottom-right */
     .music-pause-btn {
       position: fixed;
       right: 18px;
@@ -60,6 +60,22 @@
       backdrop-filter: blur(4px);
     }
     .music-pause-btn:hover { transform: translateY(-2px); }
+
+    /* Radio button now to left of pause button */
+    .radio-button {
+      position: fixed;
+      right: 92px; /* sits to the left of the pause button which is at right:18px */
+      bottom: 18px;
+      z-index: 99999;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+    }
 
     /* Center resume button (visible when paused/not playing) */
     .music-resume-center {
@@ -79,24 +95,10 @@
     }
     .music-resume-center:hover { transform: translateX(-50%) translateY(-3px); }
 
-    /* Radio / upcoming UI bottom-left */
-    .radio-button {
-      position: fixed;
-      left: 18px;
-      bottom: 18px;
-      z-index: 99999;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      backdrop-filter: blur(4px);
-    }
+    /* Radio drawer (moved to bottom-right so it's adjacent to radio button) */
     .radio-drawer {
       position: fixed;
-      left: 18px;
+      right: 18px;
       bottom: 64px;
       z-index: 99999;
       width: 320px;
@@ -111,12 +113,24 @@
       font-size: 13px;
       backdrop-filter: blur(6px);
     }
-    .radio-drawer h4 { margin: 0 0 8px 0; font-weight:700; font-family: 'Bebas Neue', cursive; color: #ff2b6d; }
+    .radio-drawer h4 {
+      margin: 0 0 8px 0;
+      font-weight:700;
+      font-family: 'Bebas Neue', cursive;
+      color: #ff2b6d;
+      font-size: 18px; /* bigger heading */
+    }
     .radio-item { padding: 8px; border-radius:8px; display:flex; gap:8px; align-items:center; }
     .radio-item + .radio-item { margin-top:6px; }
-    .radio-item .title { font-weight:600; font-size:14px; }
-    .radio-item .meta { font-size:12px; opacity:0.7; }
+    .radio-item .title { font-weight:700; font-size:16px; } /* larger title */
+    .radio-item .meta { font-size:13px; opacity:0.8; }
     .radio-current { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.025); }
+
+    @media (max-width:420px){
+      .radio-drawer { width: calc(100% - 36px); right:18px; left:18px; }
+      .radio-button { right: 18px; bottom: 18px; } /* fallback on tiny screens */
+      .music-pause-btn { right: 18px; bottom: 56px; } /* avoid overlap */
+    }
   </style>
 </head>
 <body class="bg-black text-white">
@@ -147,7 +161,6 @@
 
   <div class="site-content flex flex-col min-h-screen">
 
-    <!-- Header -->
     <header class="container mx-auto px-4 py-8 flex justify-between items-center fixed w-full top-0 bg-black z-0">
       <div class="flex items-center space-x-10">
         <img src="1000020118.jpg" alt="Ravescore logo" class="h-12 w-auto rounded-md shadow-lg">
@@ -162,7 +175,6 @@
       </nav>
     </header>
 
-    <!-- Main -->
     <main class="flex-grow flex items-center justify-center px-4 pt-32">
       <div class="text-center max-w-4xl mx-auto">
         <div class="warning-box animate-pulse text-white px-6 py-4 rounded-lg mb-8 inline-block">
@@ -314,7 +326,7 @@
     <div class="radio-item radio-current">
       <div class="flex-1">
         <div class="title">Martin Garrix — High On Life</div>
-        <div class="meta">Looping — starts at 0:22</div>
+        <div class="meta">Looping — starts at 0:00</div>
       </div>
     </div>
     <div class="radio-item">
@@ -549,7 +561,7 @@
         videoId: YT_VIDEO_ID,
         playerVars: {
           autoplay: 0,
-          start: 22,
+          start: 0, // changed to 0:00 start
           loop: 1,
           playlist: YT_VIDEO_ID,
           controls: 0,
@@ -729,7 +741,6 @@
     });
 
     // Ensure scrolling isn't accidentally locked from earlier page states:
-    // If intro was removed before and overflow is still hidden and there is no update overlay, restore it.
     window.addEventListener('load', ()=> {
       if (!document.getElementById('intro-screen') && !document.getElementById('rs-update-overlay')) {
         restoreScrollingIfNoPopup();
