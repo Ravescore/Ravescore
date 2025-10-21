@@ -38,46 +38,57 @@
     }
     .animate-pulse-slow{animation:pulseSlow 1.8s ease-in-out infinite;}
 
-    #intro-screen {
-      transition: opacity 0.8s ease;
+    #intro-screen { transition: opacity 0.8s ease; }
+
+    /* Music / radio controls */
+    /* radio button placed to left of toggle control */
+    .radio-button {
+      position: fixed;
+      right: 92px; /* sits to the left of the control button (which is at right:18px) */
+      bottom: 18px;
+      z-index: 99999;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
+    }
+    .radio-button:hover {
+      transform: translateY(-4px);
+      background: rgba(255,43,109,0.08);
+      box-shadow: 0 8px 30px rgba(255,43,109,0.06);
     }
 
-    /* Music control UI */
-    /* Side pause button (only visible when playing) - stays bottom-right */
-    .music-pause-btn {
+    .control-button {
       position: fixed;
       right: 18px;
       bottom: 18px;
       z-index: 99999;
-      display: none;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
       color: #fff;
       padding: 8px 12px;
       border-radius: 12px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       backdrop-filter: blur(4px);
+      transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
+      display: none; /* shown after intro */
     }
-    .music-pause-btn:hover { transform: translateY(-2px); }
-
-    /* Radio button now to left of pause button */
-    .radio-button {
-      position: fixed;
-      right: 92px; /* sits to the left of the pause button which is at right:18px */
-      bottom: 18px;
-      z-index: 99999;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
+    /* Hover highlight - matches top hover feel */
+    .control-button:hover {
+      transform: translateY(-4px);
+      background: rgba(255,43,109,0.12);
+      box-shadow: 0 10px 34px rgba(255,43,109,0.08);
       color: #fff;
-      padding: 8px 12px;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      backdrop-filter: blur(4px);
     }
+    .control-button:focus { outline: 2px solid rgba(255,43,109,0.18); outline-offset: 3px; }
 
-    /* Center resume button (visible when paused/not playing) */
+    /* Center resume removed — we now use single control in same position; but keep resume center hidden fallback */
     .music-resume-center {
       position: fixed;
       left: 50%;
@@ -95,7 +106,7 @@
     }
     .music-resume-center:hover { transform: translateX(-50%) translateY(-3px); }
 
-    /* Radio drawer (moved to bottom-right so it's adjacent to radio button) */
+    /* Radio drawer (bottom-right) */
     .radio-drawer {
       position: fixed;
       right: 18px;
@@ -118,18 +129,18 @@
       font-weight:700;
       font-family: 'Bebas Neue', cursive;
       color: #ff2b6d;
-      font-size: 18px; /* bigger heading */
+      font-size: 18px;
     }
     .radio-item { padding: 8px; border-radius:8px; display:flex; gap:8px; align-items:center; }
     .radio-item + .radio-item { margin-top:6px; }
-    .radio-item .title { font-weight:700; font-size:16px; } /* larger title */
+    .radio-item .title { font-weight:700; font-size:16px; }
     .radio-item .meta { font-size:13px; opacity:0.8; }
     .radio-current { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.025); }
 
     @media (max-width:420px){
       .radio-drawer { width: calc(100% - 36px); right:18px; left:18px; }
       .radio-button { right: 18px; bottom: 18px; } /* fallback on tiny screens */
-      .music-pause-btn { right: 18px; bottom: 56px; } /* avoid overlap */
+      .control-button { right: 18px; bottom: 56px; } /* avoid overlap */
     }
   </style>
 </head>
@@ -161,6 +172,7 @@
 
   <div class="site-content flex flex-col min-h-screen">
 
+    <!-- Header -->
     <header class="container mx-auto px-4 py-8 flex justify-between items-center fixed w-full top-0 bg-black z-0">
       <div class="flex items-center space-x-10">
         <img src="1000020118.jpg" alt="Ravescore logo" class="h-12 w-auto rounded-md shadow-lg">
@@ -322,7 +334,6 @@
 
   <div id="radio-drawer" class="radio-drawer" aria-hidden="true" role="region" aria-label="Upcoming tracks">
     <h4>Upcoming</h4>
-    <!-- Since there's only 1 song, show it as current + queued entries empty -->
     <div class="radio-item radio-current">
       <div class="flex-1">
         <div class="title">Martin Garrix — High On Life</div>
@@ -337,9 +348,11 @@
     </div>
   </div>
 
-  <!-- Side pause & center resume -->
-  <button id="pause-music" class="music-pause-btn" aria-hidden="true">Pause</button>
-  <button id="resume-music" class="music-resume-center" aria-hidden="true">Resume</button>
+  <!-- Single control button (Pause / Resume toggle) -->
+  <button id="music-toggle" class="control-button" aria-pressed="false" aria-hidden="true">Resume</button>
+
+  <!-- small fallback center resume if you want - kept but hidden -->
+  <button id="music-resume-center" class="music-resume-center" aria-hidden="true">Resume</button>
 
   <!-- Libraries -->
   <script src="https://unpkg.com/feather-icons"></script>
@@ -532,15 +545,15 @@
   <script src="https://www.youtube.com/iframe_api"></script>
 
   <script>
-    // --- Music / Radio logic (only music + small scroll fix modified) ---
-    const YT_VIDEO_ID = 'Lpjcm1F8tY8'; // your ID
+    // --- Music / Radio logic (only music-related code changed) ---
+    const YT_VIDEO_ID = 'Lpjcm1F8tY8';
     let player = null;
     let playerReady = false;
     let userClickedStart = false;
     let musicPlaying = false;
-    const INTRO_BURST_MS = 2800; // matches your burst animation
-    const FADE_IN_MS = 2000; // fade in time for volume
-    const FADE_TARGET_VOLUME = 50; // 0-100
+    const INTRO_BURST_MS = 2800; // burst animation length
+    const FADE_IN_MS = 2000;
+    const FADE_TARGET_VOLUME = 50;
 
     function setIframeAllowAttributes() {
       try {
@@ -549,9 +562,7 @@
         if (!iframe) return;
         iframe.setAttribute('allow', 'autoplay; encrypted-media; accelerometer; gyroscope; picture-in-picture; clipboard-write; web-share');
         iframe.setAttribute('playsinline', '1');
-      } catch (e) {
-        console.warn('Could not set iframe allow attributes:', e);
-      }
+      } catch (e) { console.warn('Could not set iframe allow attributes:', e); }
     }
 
     function onYouTubeIframeAPIReady() {
@@ -561,7 +572,7 @@
         videoId: YT_VIDEO_ID,
         playerVars: {
           autoplay: 0,
-          start: 0, // changed to 0:00 start
+          start: 0, // now starts at 0:00
           loop: 1,
           playlist: YT_VIDEO_ID,
           controls: 0,
@@ -572,19 +583,16 @@
         events: {
           onReady: function () {
             playerReady = true;
-            try { player.setVolume(0); } catch (err) { /* ignore */ }
+            try { player.setVolume(0); } catch(e){}
             setIframeAllowAttributes();
-
-            // If user clicked Start before the player finished loading, start muted now
             if (userClickedStart && !musicPlaying) {
-              try { player.playVideo(); musicPlaying = true; } catch (err) { console.warn('playVideo on ready failed', err); }
+              try { player.playVideo(); musicPlaying = true; } catch(e){ console.warn(e); }
             }
           }
         }
       });
     }
 
-    // fade function (0-100)
     function fadeTo(targetVolume, duration = FADE_IN_MS) {
       if (!player || typeof player.setVolume !== 'function') return;
       let current = 0;
@@ -600,45 +608,40 @@
       }, 50);
     }
 
-    // Restore scrolling helper: only restore if update popup isn't visible
     function restoreScrollingIfNoPopup() {
-      // If update overlay exists, do NOT change overflow (popup handles it)
-      if (document.getElementById('rs-update-overlay')) {
-        return;
-      }
+      if (document.getElementById('rs-update-overlay')) return;
       document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
     }
 
-    // Start Experience button (user gesture)
     const startBtn = document.getElementById('start-experience-btn');
+    const musicToggle = document.getElementById('music-toggle');
+    const radioButton = document.getElementById('radio-button');
+    const radioDrawer = document.getElementById('radio-drawer');
+    const centerResume = document.getElementById('music-resume-center');
+
+    // Start experience click (user gesture)
     startBtn.addEventListener('click', function () {
       userClickedStart = true;
 
-      // If YouTube player is ready, start muted immediately (user gesture)
       if (playerReady && player) {
         try {
           player.setVolume(0);
           setIframeAllowAttributes();
           player.playVideo();
           musicPlaying = true;
-        } catch (err) {
-          console.warn('player.playVideo() failed on click:', err);
-        }
+        } catch (err) { console.warn('player.playVideo() failed on click:', err); }
       }
 
-      // Trigger burst animation on logo
+      // animate logo burst
       const introLogo = document.getElementById('intro-logo');
       introLogo.classList.add('animate-burst-logo');
 
-      // keep intro for full burst duration
       setTimeout(() => {
         const intro = document.getElementById('intro-screen');
-
-        // start visual fade
         intro.style.opacity = '0';
 
-        // start or fade-in music at same time
+        // start or fade-in music
         if (player && musicPlaying) {
           fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS);
         } else if (player && !musicPlaying) {
@@ -649,7 +652,6 @@
             fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS);
           } catch (e) {
             console.warn('Attempt to play after burst failed:', e);
-            // poll until ready
             const readyPoll = setInterval(()=>{
               if (playerReady && player && !musicPlaying){
                 try { player.setVolume(0); player.playVideo(); musicPlaying=true; fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(readyPoll); }
@@ -660,7 +662,6 @@
             }, 250);
           }
         } else {
-          // if player not initialized yet, poll and start when ready
           const readyPoll = setInterval(()=>{
             if (playerReady && player) {
               try { player.setVolume(0); player.playVideo(); musicPlaying=true; fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(readyPoll); }
@@ -669,24 +670,20 @@
           }, 300);
         }
 
-        // show music control UI (side pause)
-        const pauseBtn = document.getElementById('pause-music');
-        const resumeBtn = document.getElementById('resume-music');
+        // Show the single toggle control at the right position
+        musicToggle.style.display = 'block';
+        musicToggle.setAttribute('aria-hidden', 'false');
 
-        // If musicPlaying then show pause; else show resume centered
+        // Initialize toggle label according to playing state
         if (musicPlaying) {
-          pauseBtn.style.display = 'block';
-          pauseBtn.setAttribute('aria-hidden', 'false');
-          resumeBtn.style.display = 'none';
-          resumeBtn.setAttribute('aria-hidden', 'true');
+          musicToggle.textContent = 'Pause';
+          musicToggle.setAttribute('aria-pressed', 'true');
         } else {
-          pauseBtn.style.display = 'none';
-          pauseBtn.setAttribute('aria-hidden', 'true');
-          resumeBtn.style.display = 'block';
-          resumeBtn.setAttribute('aria-hidden', 'false');
+          musicToggle.textContent = 'Resume';
+          musicToggle.setAttribute('aria-pressed', 'false');
         }
 
-        // restore scrolling (unless update popup is present)
+        // restore scrolling if no update popup is present
         restoreScrollingIfNoPopup();
 
         // remove intro after fade completes
@@ -694,39 +691,46 @@
       }, INTRO_BURST_MS);
     });
 
-    // Pause / Resume controls behavior
-    const pauseBtn = document.getElementById('pause-music');
-    const resumeBtn = document.getElementById('resume-music');
-
-    pauseBtn.addEventListener('click', function () {
-      if (!player) return;
-      // fade down then pause
-      fadeTo(0, 600);
-      setTimeout(()=>{ try { player.pauseVideo(); } catch(e){} }, 650);
-
-      // update UI: hide pause, show resume center
-      pauseBtn.style.display = 'none';
-      pauseBtn.setAttribute('aria-hidden', 'true');
-      resumeBtn.style.display = 'block';
-      resumeBtn.setAttribute('aria-hidden', 'false');
+    // Toggle button behaviour (single control)
+    musicToggle.addEventListener('click', function () {
+      // if playing, pause; if paused, resume
+      if (musicPlaying) {
+        // fade out and pause
+        fadeTo(0, 600);
+        setTimeout(()=>{ try { player.pauseVideo(); } catch(e){} }, 650);
+        musicPlaying = false;
+        musicToggle.textContent = 'Resume';
+        musicToggle.setAttribute('aria-pressed', 'false');
+        // also show optional center resume for visibility (kept small behavior)
+        centerResume.style.display = 'block';
+        centerResume.setAttribute('aria-hidden', 'false');
+      } else {
+        // resume: start playback and fade to volume
+        try { player.playVideo(); } catch(e){ console.warn(e); }
+        setTimeout(()=>{ fadeTo(FADE_TARGET_VOLUME, 800); }, 80);
+        musicPlaying = true;
+        musicToggle.textContent = 'Pause';
+        musicToggle.setAttribute('aria-pressed', 'true');
+        centerResume.style.display = 'none';
+        centerResume.setAttribute('aria-hidden', 'true');
+      }
     });
 
-    resumeBtn.addEventListener('click', function () {
+    // center resume click (fallback) - mirrors toggle
+    centerResume.addEventListener('click', function () {
       if (!player) return;
-      try { player.playVideo(); musicPlaying = true; } catch(e){ console.warn(e); }
-      // fade up
+      try { player.playVideo(); } catch(e){ console.warn(e); }
       setTimeout(()=>{ fadeTo(FADE_TARGET_VOLUME, 800); }, 80);
-
-      // update UI
-      resumeBtn.style.display = 'none';
-      resumeBtn.setAttribute('aria-hidden', 'true');
-      pauseBtn.style.display = 'block';
-      pauseBtn.setAttribute('aria-hidden', 'false');
+      musicPlaying = true;
+      musicToggle.textContent = 'Pause';
+      musicToggle.setAttribute('aria-pressed', 'true');
+      centerResume.style.display = 'none';
+      centerResume.setAttribute('aria-hidden', 'true');
+      musicToggle.style.display = 'block';
+      musicToggle.setAttribute('aria-hidden', 'false');
     });
 
     // Radio drawer toggle
-    const radioButton = document.getElementById('radio-button');
-    const radioDrawer = document.getElementById('radio-drawer');
     radioButton.addEventListener('click', function () {
       const expanded = radioButton.getAttribute('aria-expanded') === 'true';
       if (expanded) {
@@ -740,14 +744,14 @@
       }
     });
 
-    // Ensure scrolling isn't accidentally locked from earlier page states:
+    // make sure scrolling restored after load if intro was removed earlier
     window.addEventListener('load', ()=> {
       if (!document.getElementById('intro-screen') && !document.getElementById('rs-update-overlay')) {
         restoreScrollingIfNoPopup();
       }
     });
 
-    // NOTE: We intentionally do NOT pause the music on visibilitychange — it will keep playing across tabs.
+    // Note: intentionally do not pause music on tab visibility change (keeps playing)
   </script>
 
   <div id="youtube-music"></div>
