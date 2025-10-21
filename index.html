@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang=en>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<<<<<<< HEAD
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="description" content="Ravescore — immersive visual experiences and digital content studio." />
@@ -43,27 +42,81 @@
       transition: opacity 0.8s ease;
     }
 
-    /* Music control UI (added only for music) */
-    #music-controls {
+    /* Music control UI */
+    /* Side pause button (only visible when playing) */
+    .music-pause-btn {
       position: fixed;
-      right: 16px;
-      bottom: 16px;
-      display: none;
+      right: 18px;
+      bottom: 18px;
       z-index: 99999;
-      gap: 8px;
-      align-items: center;
-    }
-    #music-controls button {
+      display: none;
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.12);
       color: #fff;
       padding: 8px 12px;
-      border-radius: 10px;
+      border-radius: 12px;
       font-weight: 600;
       cursor: pointer;
       backdrop-filter: blur(4px);
     }
-    #music-controls button:hover { transform: translateY(-2px); }
+    .music-pause-btn:hover { transform: translateY(-2px); }
+
+    /* Center resume button (visible when paused/not playing) */
+    .music-resume-center {
+      position: fixed;
+      left: 50%;
+      bottom: 22%;
+      transform: translateX(-50%);
+      z-index: 99999;
+      display: none;
+      background: #ff2b6d;
+      color: white;
+      padding: 14px 22px;
+      border-radius: 999px;
+      font-weight: 700;
+      box-shadow: 0 8px 30px rgba(255,43,109,0.15);
+      cursor: pointer;
+    }
+    .music-resume-center:hover { transform: translateX(-50%) translateY(-3px); }
+
+    /* Radio / upcoming UI bottom-left */
+    .radio-button {
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      z-index: 99999;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+    }
+    .radio-drawer {
+      position: fixed;
+      left: 18px;
+      bottom: 64px;
+      z-index: 99999;
+      width: 320px;
+      max-width: calc(100% - 36px);
+      background: rgba(10,10,10,0.95);
+      border: 1px solid rgba(255,255,255,0.04);
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+      display: none;
+      color: #fff;
+      font-size: 13px;
+      backdrop-filter: blur(6px);
+    }
+    .radio-drawer h4 { margin: 0 0 8px 0; font-weight:700; font-family: 'Bebas Neue', cursive; color: #ff2b6d; }
+    .radio-item { padding: 8px; border-radius:8px; display:flex; gap:8px; align-items:center; }
+    .radio-item + .radio-item { margin-top:6px; }
+    .radio-item .title { font-weight:600; font-size:14px; }
+    .radio-item .meta { font-size:12px; opacity:0.7; }
+    .radio-current { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.025); }
   </style>
 </head>
 <body class="bg-black text-white">
@@ -94,6 +147,7 @@
 
   <div class="site-content flex flex-col min-h-screen">
 
+    <!-- Header -->
     <header class="container mx-auto px-4 py-8 flex justify-between items-center fixed w-full top-0 bg-black z-0">
       <div class="flex items-center space-x-10">
         <img src="1000020118.jpg" alt="Ravescore logo" class="h-12 w-auto rounded-md shadow-lg">
@@ -108,6 +162,7 @@
       </nav>
     </header>
 
+    <!-- Main -->
     <main class="flex-grow flex items-center justify-center px-4 pt-32">
       <div class="text-center max-w-4xl mx-auto">
         <div class="warning-box animate-pulse text-white px-6 py-4 rounded-lg mb-8 inline-block">
@@ -250,13 +305,31 @@
     </footer>
   </div>
 
-  <!-- music control UI (will be shown after intro) -->
-  <div id="music-controls" aria-hidden="true">
-    <button id="pause-music" aria-label="Pause music">Pause</button>
-    <button id="resume-music" aria-label="Resume music">Resume</button>
+  <!-- Radio & Music UI -->
+  <button id="radio-button" class="radio-button" aria-expanded="false" aria-controls="radio-drawer">Radio</button>
+
+  <div id="radio-drawer" class="radio-drawer" aria-hidden="true" role="region" aria-label="Upcoming tracks">
+    <h4>Upcoming</h4>
+    <!-- Since there's only 1 song, show it as current + queued entries empty -->
+    <div class="radio-item radio-current">
+      <div class="flex-1">
+        <div class="title">Martin Garrix — High On Life</div>
+        <div class="meta">Looping — starts at 0:22</div>
+      </div>
+    </div>
+    <div class="radio-item">
+      <div class="flex-1">
+        <div class="title">(No more tracks)</div>
+        <div class="meta">Add more to the queue later</div>
+      </div>
+    </div>
   </div>
 
-  <!-- Libraries (loaded at end for performance) -->
+  <!-- Side pause & center resume -->
+  <button id="pause-music" class="music-pause-btn" aria-hidden="true">Pause</button>
+  <button id="resume-music" class="music-resume-center" aria-hidden="true">Resume</button>
+
+  <!-- Libraries -->
   <script src="https://unpkg.com/feather-icons"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
@@ -284,7 +357,7 @@
     }
   </script>
 
-  <!-- CONTACT FORM MAILTO SCRIPT -->
+  <!-- CONTACT FORM MAILTO SCRIPT (unchanged) -->
   <script>
     (function () {
       const FORM_RECIPIENT = 'cookies.development1@gmail.com';
@@ -370,25 +443,19 @@
     })();
   </script>
 
-  <!-- UPDATE POPUP (ADDED) -->
+  <!-- UPDATE POPUP (unchanged) -->
   <script>
     (function () {
-      // CHANGE THIS VERSION STRING WHENEVER YOU PUSH A NEW UPDATE
       const SITE_VERSION = '2.0.0';
       const VERSION_KEY = 'ravescore_version_seen';
-
-      // Do not break if localStorage is not available
       let seenVersion = null;
       try {
         seenVersion = localStorage.getItem(VERSION_KEY);
       } catch (e) {
         console.warn('localStorage unavailable:', e);
       }
-
-      // If user already saw this version, do nothing
       if (seenVersion === SITE_VERSION) return;
 
-      // Create styles for popup (scoped)
       const style = document.createElement('style');
       style.textContent = `
         #rs-update-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;display:flex;align-items:center;justify-content:center}
@@ -403,7 +470,6 @@
       `;
       document.head.appendChild(style);
 
-      // Build popup DOM
       const overlay = document.createElement('div');
       overlay.id = 'rs-update-overlay';
       overlay.setAttribute('role', 'dialog');
@@ -434,7 +500,6 @@
       document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
 
-      // Close button: only way to close (no backdrop click, no ESC)
       const closeBtn = document.getElementById('rs-update-close');
       closeBtn.addEventListener('click', function () {
         try {
@@ -442,13 +507,11 @@
         } catch (e) {
           console.warn('Could not write version to localStorage:', e);
         }
-        // remove overlay and restore scrolling
         if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
         document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
       });
 
-      // Set focus to close button so keyboard users can easily close
       closeBtn.focus();
     })();
   </script>
@@ -457,18 +520,28 @@
   <script src="https://www.youtube.com/iframe_api"></script>
 
   <script>
-    // --- Robust YouTube music integration (only music-related code changed) ---
-    // Video ID from your URL: Lpjcm1F8tY8 (starts ~0:24 in link, we set start=22s)
-    const YT_VIDEO_ID = 'Lpjcm1F8tY8';
+    // --- Music / Radio logic (only music + small scroll fix modified) ---
+    const YT_VIDEO_ID = 'Lpjcm1F8tY8'; // your ID
     let player = null;
     let playerReady = false;
     let userClickedStart = false;
     let musicPlaying = false;
-    const INTRO_BURST_MS = 2800; // duration of burst animation
-    const FADE_IN_MS = 2000; // fade-in length
+    const INTRO_BURST_MS = 2800; // matches your burst animation
+    const FADE_IN_MS = 2000; // fade in time for volume
     const FADE_TARGET_VOLUME = 50; // 0-100
 
-    // Create the player when API ready
+    function setIframeAllowAttributes() {
+      try {
+        if (!player || !player.getIframe) return;
+        const iframe = player.getIframe();
+        if (!iframe) return;
+        iframe.setAttribute('allow', 'autoplay; encrypted-media; accelerometer; gyroscope; picture-in-picture; clipboard-write; web-share');
+        iframe.setAttribute('playsinline', '1');
+      } catch (e) {
+        console.warn('Could not set iframe allow attributes:', e);
+      }
+    }
+
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('youtube-music', {
         height: '0',
@@ -476,9 +549,9 @@
         videoId: YT_VIDEO_ID,
         playerVars: {
           autoplay: 0,
-          start: 22,            // start at 22s
+          start: 22,
           loop: 1,
-          playlist: YT_VIDEO_ID, // required for loop
+          playlist: YT_VIDEO_ID,
           controls: 0,
           modestbranding: 1,
           disablekb: 1,
@@ -487,155 +560,185 @@
         events: {
           onReady: function () {
             playerReady = true;
-            try { player.setVolume(0); } catch(e){/*ignore*/}
+            try { player.setVolume(0); } catch (err) { /* ignore */ }
+            setIframeAllowAttributes();
 
-            // If user already clicked start before player ready, start playback silently now
+            // If user clicked Start before the player finished loading, start muted now
             if (userClickedStart && !musicPlaying) {
-              try { player.playVideo(); musicPlaying = true; } catch(e){ console.warn('playVideo on ready failed', e); }
+              try { player.playVideo(); musicPlaying = true; } catch (err) { console.warn('playVideo on ready failed', err); }
             }
-          },
-          onStateChange: function(e){
-            // no-op for now
           }
         }
       });
     }
 
-    // Fade helpers (volume 0-100)
+    // fade function (0-100)
     function fadeTo(targetVolume, duration = FADE_IN_MS) {
       if (!player || typeof player.setVolume !== 'function') return;
+      let current = 0;
+      try { current = player.getVolume ? player.getVolume() : 0; } catch(e){ current = 0; }
       const steps = Math.max(1, Math.round(duration / 50));
-      let current = player.getVolume ? player.getVolume() : 0;
-      const diff = (targetVolume - current);
+      const diff = targetVolume - current;
       let stepIndex = 0;
       const interval = setInterval(() => {
         stepIndex++;
         const next = current + (diff * (stepIndex / steps));
-        player.setVolume(Math.round(Math.max(0, Math.min(100, next))));
-        if (stepIndex >= steps) {
-          clearInterval(interval);
-        }
+        try { player.setVolume(Math.round(Math.max(0, Math.min(100, next)))); } catch(e){}
+        if (stepIndex >= steps) clearInterval(interval);
       }, 50);
     }
 
-    // Start Experience logic (only triggered by user click)
+    // Restore scrolling helper: only restore if update popup isn't visible
+    function restoreScrollingIfNoPopup() {
+      // If update overlay exists, do NOT change overflow (popup handles it)
+      if (document.getElementById('rs-update-overlay')) {
+        return;
+      }
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    }
+
+    // Start Experience button (user gesture)
     const startBtn = document.getElementById('start-experience-btn');
-    startBtn.addEventListener('click', function (ev) {
-      // Mark that user interacted so we can start playback even if player not yet ready
+    startBtn.addEventListener('click', function () {
       userClickedStart = true;
 
-      // If player is ready, start playback silently immediately (satisfies gesture)
+      // If YouTube player is ready, start muted immediately (user gesture)
       if (playerReady && player) {
         try {
-          // start playback muted (volume 0) immediately to satisfy autoplay policy
           player.setVolume(0);
+          setIframeAllowAttributes();
           player.playVideo();
           musicPlaying = true;
         } catch (err) {
           console.warn('player.playVideo() failed on click:', err);
         }
       }
-      // If player not ready, onReady will start playback.
 
-      // Play intro burst animation on the logo (ensures full animation)
+      // Trigger burst animation on logo
       const introLogo = document.getElementById('intro-logo');
-      // add class to trigger burst; if already was animated this won't break
       introLogo.classList.add('animate-burst-logo');
 
-      // Keep intro visible for full burst duration, then fade out and remove.
-      // We'll begin audible fade-in shortly before remove for a smooth transition.
+      // keep intro for full burst duration
       setTimeout(() => {
-        // Start fading intro visually
         const intro = document.getElementById('intro-screen');
+
+        // start visual fade
         intro.style.opacity = '0';
 
-        // Make music audible (fade in) right when intro starts fading
+        // start or fade-in music at same time
         if (player && musicPlaying) {
-          // fade to target volume smoothly
           fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS);
         } else if (player && !musicPlaying) {
-          // If player wasn't playing yet but is ready, start it and fade in
-          try { player.playVideo(); musicPlaying = true; fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); } catch(e){ console.warn(e); }
+          try {
+            player.setVolume(0);
+            player.playVideo();
+            musicPlaying = true;
+            fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS);
+          } catch (e) {
+            console.warn('Attempt to play after burst failed:', e);
+            // poll until ready
+            const readyPoll = setInterval(()=>{
+              if (playerReady && player && !musicPlaying){
+                try { player.setVolume(0); player.playVideo(); musicPlaying=true; fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(readyPoll); }
+                catch(err){ console.warn(err); }
+              } else if (playerReady && player && musicPlaying) {
+                fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(readyPoll);
+              }
+            }, 250);
+          }
         } else {
-          // player not ready yet — when onReady runs it will play (see above)
-          // and we still want to fade in when it does — to keep simple, poll until ready
+          // if player not initialized yet, poll and start when ready
           const readyPoll = setInterval(()=>{
-            if (playerReady && player && !musicPlaying){
+            if (playerReady && player) {
               try { player.setVolume(0); player.playVideo(); musicPlaying=true; fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(readyPoll); }
-              catch(e){ console.warn(e); }
-            } else if (playerReady && player && musicPlaying) {
-              fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS);
-              clearInterval(readyPoll);
+              catch(e){ console.warn('Delayed start failed', e); }
             }
-          }, 200);
+          }, 300);
         }
 
-        // Show music controls (pause/resume)
-        const mc = document.getElementById('music-controls');
-        mc.style.display = 'flex';
-        mc.setAttribute('aria-hidden', 'false');
+        // show music control UI (side pause)
+        const pauseBtn = document.getElementById('pause-music');
+        const resumeBtn = document.getElementById('resume-music');
 
-        // Remove intro after fade complete
-        setTimeout(()=>{ const intro = document.getElementById('intro-screen'); if(intro && intro.parentNode) intro.parentNode.removeChild(intro); }, 800);
+        // If musicPlaying then show pause; else show resume centered
+        if (musicPlaying) {
+          pauseBtn.style.display = 'block';
+          pauseBtn.setAttribute('aria-hidden', 'false');
+          resumeBtn.style.display = 'none';
+          resumeBtn.setAttribute('aria-hidden', 'true');
+        } else {
+          pauseBtn.style.display = 'none';
+          pauseBtn.setAttribute('aria-hidden', 'true');
+          resumeBtn.style.display = 'block';
+          resumeBtn.setAttribute('aria-hidden', 'false');
+        }
+
+        // restore scrolling (unless update popup is present)
+        restoreScrollingIfNoPopup();
+
+        // remove intro after fade completes
+        setTimeout(()=>{ const i = document.getElementById('intro-screen'); if (i && i.parentNode) i.parentNode.removeChild(i); }, 800);
       }, INTRO_BURST_MS);
     });
 
-    // Pause / Resume buttons
+    // Pause / Resume controls behavior
     const pauseBtn = document.getElementById('pause-music');
     const resumeBtn = document.getElementById('resume-music');
+
     pauseBtn.addEventListener('click', function () {
       if (!player) return;
-      // fade out then pause
+      // fade down then pause
       fadeTo(0, 600);
-      setTimeout(()=>{ try{ player.pauseVideo(); } catch(e){/*ignore*/} }, 650);
-    });
-    resumeBtn.addEventListener('click', function () {
-      if (!player) return;
-      try { player.playVideo(); } catch(e){ console.warn(e); }
-      // fade back in
-      setTimeout(()=> { fadeTo(FADE_TARGET_VOLUME, 800); }, 80);
+      setTimeout(()=>{ try { player.pauseVideo(); } catch(e){} }, 650);
+
+      // update UI: hide pause, show resume center
+      pauseBtn.style.display = 'none';
+      pauseBtn.setAttribute('aria-hidden', 'true');
+      resumeBtn.style.display = 'block';
+      resumeBtn.setAttribute('aria-hidden', 'false');
     });
 
-    // Pause music when tab hidden, resume when visible (optional friendly behavior)
-    document.addEventListener('visibilitychange', () => {
+    resumeBtn.addEventListener('click', function () {
       if (!player) return;
-      try {
-        if (document.hidden) {
-          // quickly lower volume (not abrupt)
-          fadeTo(0, 300);
-        } else {
-          // restore
-          fadeTo(FADE_TARGET_VOLUME, 800);
-        }
-      } catch (e) { /* ignore */ }
+      try { player.playVideo(); musicPlaying = true; } catch(e){ console.warn(e); }
+      // fade up
+      setTimeout(()=>{ fadeTo(FADE_TARGET_VOLUME, 800); }, 80);
+
+      // update UI
+      resumeBtn.style.display = 'none';
+      resumeBtn.setAttribute('aria-hidden', 'true');
+      pauseBtn.style.display = 'block';
+      pauseBtn.setAttribute('aria-hidden', 'false');
     });
+
+    // Radio drawer toggle
+    const radioButton = document.getElementById('radio-button');
+    const radioDrawer = document.getElementById('radio-drawer');
+    radioButton.addEventListener('click', function () {
+      const expanded = radioButton.getAttribute('aria-expanded') === 'true';
+      if (expanded) {
+        radioDrawer.style.display = 'none';
+        radioDrawer.setAttribute('aria-hidden', 'true');
+        radioButton.setAttribute('aria-expanded', 'false');
+      } else {
+        radioDrawer.style.display = 'block';
+        radioDrawer.setAttribute('aria-hidden', 'false');
+        radioButton.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    // Ensure scrolling isn't accidentally locked from earlier page states:
+    // If intro was removed before and overflow is still hidden and there is no update overlay, restore it.
+    window.addEventListener('load', ()=> {
+      if (!document.getElementById('intro-screen') && !document.getElementById('rs-update-overlay')) {
+        restoreScrollingIfNoPopup();
+      }
+    });
+
+    // NOTE: We intentionally do NOT pause the music on visibilitychange — it will keep playing across tabs.
   </script>
 
   <div id="youtube-music"></div>
-=======
-<meta charset=utf-8>
-<meta name=viewport content="width=device-width,initial-scale=1">
-<meta name=description content="Ravescore — immersive visual experiences and digital content studio.">
-<title>Ravescore - Under Maintenance</title>
-<link rel=icon type=image/x-icon href=1000020118.jpg>
-<link rel=preconnect href=https://fonts.gstatic.com crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700&display=swap" rel=stylesheet>
-<script src=https://cdn.tailwindcss.com></script>
-<script src=https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js></script>
-<script src=https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js crossorigin=anonymous></script>
-<script src=https://unpkg.com/feather-icons></script>
-<style>body{font-family:Montserrat,sans-serif;margin:0;background-color:#000;color:#fff;overflow:hidden;min-height:100vh}.title-font{font-family:'Bebas Neue',cursive;letter-spacing:.02em}#vanta-bg{position:fixed;inset:0;z-index:0;pointer-events:none;width:100%;height:100vh}.spinner{border:4px solid rgba(255,255,255,.1);border-top:4px solid #ef4444;border-radius:50%;width:64px;height:64px;animation:spin 1.5s linear infinite;margin-bottom:20px}@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}</style>
-</head>
-<body>
-<div id=vanta-bg></div>
-<div class="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
-<img src=1000020118.jpg alt="Ravescore logo" class="h-16 mb-6 rounded-md shadow-lg">
-<h1 class="title-font text-4xl md:text-6xl mb-4">OFFLINE</h1>  
-<div class=spinner></div>
-<h1 class="title-font text-4xl md:text-6xl mb-4">WEBSITE UNDER MAINTENANCE</h1>
-<p class="text-lg opacity-80">Sorry for this outage. We’ll be back soon with an upgraded website.</p>
-</div>
-<script>feather.replace(),"undefined"!=typeof VANTA&&VANTA.WAVES({el:"#vanta-bg",mouseControls:!0,touchControls:!0,gyroControls:!1,minHeight:200,minWidth:200,scale:1,scaleMobile:1,color:1710618,shininess:0,waveHeight:20,waveSpeed:.25,zoom:.65})</script>
->>>>>>> 9b5e6afa032ceb6bf54be54297f2d383997e726c
 </body>
 </html>
