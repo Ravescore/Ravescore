@@ -14,30 +14,79 @@
 
   <style>
     /* Smooth scrolling */
-    html {
-      scroll-behavior: smooth;
-    }
-
-    /* Prevent header from covering section titles */
-    section {
-      scroll-margin-top: 100px; /* adjust according to header height */
-    }
-
-    body { font-family: 'Montserrat', sans-serif; margin:0; min-height:100vh; }
+    html { scroll-behavior: smooth; }
+    section { scroll-margin-top: 100px; }
+    body { font-family: 'Montserrat', sans-serif; margin:0; min-height:100vh; background:black; color:white; }
     .title-font { font-family: 'Bebas Neue', cursive; letter-spacing: .02em; }
-    #vanta-bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      width: 100%;
-      height: 100vh;
-    }
+    #vanta-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; width: 100%; height: 100vh; }
     .site-content { position: relative; z-index: 10; }
     .warning-box { background: rgba(220, 38, 38, 0.95); }
+
+    /* Intro animations */
+    @keyframes burstLogo {
+      0% { transform: scale(0.9); opacity: 0; filter: brightness(0.5); }
+      25% { transform: scale(1.05); opacity: 1; filter: brightness(1.5); }
+      50% { transform: scale(1); filter: brightness(1); }
+      75% { transform: scale(1.1); filter: brightness(2); }
+      100% { transform: scale(1); opacity: 0; }
+    }
+    .animate-burst-logo { animation: burstLogo 2.8s ease-in-out forwards; }
+
+    @keyframes pulseSlow {
+      0%,100%{opacity:0.3;transform:scale(1);}
+      50%{opacity:0.7;transform:scale(1.3);}
+    }
+    .animate-pulse-slow{animation:pulseSlow 1.8s ease-in-out infinite;}
+
+    #intro-screen {
+      transition: opacity 0.8s ease;
+    }
+
+    /* Music control UI (added only for music) */
+    #music-controls {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      display: none;
+      z-index: 99999;
+      gap: 8px;
+      align-items: center;
+    }
+    #music-controls button {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+    }
+    #music-controls button:hover { transform: translateY(-2px); }
   </style>
 </head>
 <body class="bg-black text-white">
+
+  <!-- ✨ RAVESCORE INTRO ANIMATION ✨ -->
+  <div id="intro-screen" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-[9999] overflow-hidden text-center">
+    <div class="relative flex flex-col items-center justify-center space-y-6">
+      <!-- Red glowing background circle -->
+      <div class="absolute inset-0 rounded-full bg-red-600 blur-3xl opacity-30 animate-pulse-slow"></div>
+
+      <!-- Logo -->
+      <img id="intro-logo" src="1000020118.jpg" alt="Ravescore Logo" class="h-40 w-auto rounded-xl relative z-10 shadow-lg">
+
+      <!-- Loading text -->
+      <p id="intro-text" class="text-2xl md:text-4xl font-bold text-white opacity-90 mt-8 tracking-wide animate-pulse relative z-10">
+        Loading the best website!
+      </p>
+
+      <!-- Start Experience Button -->
+      <button id="start-experience-btn" class="relative z-10 mt-6 px-6 py-3 rounded-full bg-red-600 text-white font-bold hover:bg-red-700 transition transform hover:scale-105 focus:outline focus:outline-2">
+        Start Experience
+      </button>
+    </div>
+  </div>
 
   <!-- Vanta canvas container -->
   <div id="vanta-bg" aria-hidden="true"></div>
@@ -45,7 +94,7 @@
   <div class="site-content flex flex-col min-h-screen">
 
     <header class="container mx-auto px-4 py-8 flex justify-between items-center fixed w-full top-0 bg-black z-0">
-      <div class="flex items-center space-x10">
+      <div class="flex items-center space-x-10">
         <img src="1000020118.jpg" alt="Ravescore logo" class="h-12 w-auto rounded-md shadow-lg">
         <h1 class="title-font text-3xl tracking-wide">RAVESCORE</h1>
       </div>
@@ -92,9 +141,7 @@
     <!-- Work Section -->
     <section id="work" class="py-16 bg-black text-white">
       <h3 class="title-font text-3xl md:text-5xl mb-10 text-center">Featured Work</h3>
-
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
-
         <!-- Project 1 -->
         <a href="project1.html" class="bg-gray-900 rounded-lg shadow-lg overflow-hidden group transform hover:scale-105 transition duration-300">
           <img src="1000020118.jpg" alt="Project 1" class="w-full h-48 object-cover group-hover:opacity-90 transition duration-300">
@@ -118,8 +165,6 @@
       </div>
     </section>
 
-
-
     <!-- About Section -->
     <section id="about" class="py-16 bg-black text-white border-t border-gray-800">
       <div class="max-w-3xl mx-auto px-4 text-center">
@@ -135,69 +180,110 @@
 
     <!-- Contact Section -->
     <section id="contact" class="py-16 bg-black text-white border-t border-gray-800">
-  <div class="max-w-xl mx-auto px-4">
-    <h3 class="title-font text-3xl md:text-5xl mb-6 text-center">Contact Us</h3>
-    
-    <div id="contact-success" class="hidden mb-4 rounded-md p-3 text-green-900 bg-green-100" role="status" aria-live="polite"></div>
-    <div id="contact-error" class="hidden mb-4 rounded-md p-3 text-red-900 bg-red-100" role="alert" aria-live="assertive"></div>
+      <div class="max-w-xl mx-auto px-4">
+        <h3 class="title-font text-3xl md:text-5xl mb-6 text-center">Contact Us</h3>
 
-    <form id="contact-form-mailto" class="space-y-6" novalidate>
-      <div>
-        <label for="name" class="block text-left mb-1 font-semibold">Name</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          required
-          placeholder="Your name"
-          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2 focus:outline-red-600"
-        >
+        <div id="contact-success" class="hidden mb-4 rounded-md p-3 text-green-900 bg-green-100" role="status" aria-live="polite"></div>
+        <div id="contact-error" class="hidden mb-4 rounded-md p-3 text-red-900 bg-red-100" role="alert" aria-live="assertive"></div>
+
+        <form id="contact-form-mailto" class="space-y-6" novalidate>
+          <div>
+            <label for="name" class="block text-left mb-1 font-semibold">Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              placeholder="Your name"
+              class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2 focus:outline-red-600"
+            >
+          </div>
+
+          <div>
+            <label for="email" class="block text-left mb-1 font-semibold">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              placeholder="Your email"
+              class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2 focus:outline-red-600"
+            >
+          </div>
+
+          <div>
+            <label for="message" class="block text-left mb-1 font-semibold">Message</label>
+            <textarea
+              id="message"
+              name="message"
+              rows="5"
+              required
+              placeholder="Your message"
+              class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2 focus:outline-red-600"
+            ></textarea>
+          </div>
+
+          <button id="contact-submit-mailto" type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-full transition w-full">
+            Send Message
+          </button>
+        </form>
+
+        <p class="mt-6 text-center opacity-60">
+          Or email us at
+          <a id="plain-mail-link" href="mailto:cookies.development1@gmail.com" class="text-red-400 hover:underline">cookies.development1@gmail.com</a>
+        </p>
+
+        <!-- Manual fallback UI -->
+        <div id="manual-fallback" class="mt-4 text-center hidden">
+          <p class="mb-2 text-sm opacity-70">If your mail client didn't open, you can:</p>
+          <a id="manual-mailto-link" class="inline-block mb-2 text-red-400 hover:underline" href="#" target="_blank" rel="noopener">Click here to compose manually</a>
+          <div>
+            <button id="copy-msg-btn" class="text-sm px-3 py-2 border border-gray-700 rounded-md hover:bg-gray-800">Copy message to clipboard</button>
+          </div>
+        </div>
       </div>
+    </section>
 
-      <div>
-        <label for="email" class="block text-left mb-1 font-semibold">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          required
-          placeholder="Your email"
-          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2 focus:outline-red-600"
-        >
-      </div>
-
-      <div>
-        <label for="message" class="block text-left mb-1 font-semibold">Message</label>
-        <textarea
-          id="message"
-          name="message"
-          rows="5"
-          required
-          placeholder="Your message"
-          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2 focus:outline-red-600"
-        ></textarea>
-      </div>
-
-      <button id="contact-submit-mailto" type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-full transition w-full">
-        Send Message
-      </button>
-    </form>
-
-    <p class="mt-6 text-center opacity-60">
-      Or email us at
-      <a id="plain-mail-link" href="mailto:cookies.development1@gmail.com" class="text-red-400 hover:underline">cookies.development1@gmail.com</a>
-    </p>
-
-    <!-- Manual fallback UI -->
-    <div id="manual-fallback" class="mt-4 text-center hidden">
-      <p class="mb-2 text-sm opacity-70">If your mail client didn't open, you can:</p>
-      <a id="manual-mailto-link" class="inline-block mb-2 text-red-400 hover:underline" href="#" target="_blank" rel="noopener">Click here to compose manually</a>
-      <div>
-        <button id="copy-msg-btn" class="text-sm px-3 py-2 border border-gray-700 rounded-md hover:bg-gray-800">Copy message to clipboard</button>
-      </div>
-    </div>
+    <footer class="container mx-auto px-4 py-6 text-center opacity-75 text-sm">
+      <p>© 2025 Ravescore. All rights reserved.</p>
+    </footer>
   </div>
 
+  <!-- music control UI (will be shown after intro) -->
+  <div id="music-controls" aria-hidden="true">
+    <button id="pause-music" aria-label="Pause music">Pause</button>
+    <button id="resume-music" aria-label="Resume music">Resume</button>
+  </div>
+
+  <!-- Libraries (loaded at end for performance) -->
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
+
+  <script>
+    feather.replace();
+    if (typeof VANTA !== 'undefined') {
+      VANTA.WAVES({
+        el: "#vanta-bg",
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.00,
+        minWidth: 200.00,
+        scale: 1.00,
+        scaleMobile: 1.00,
+        color: 0x1a1a1a,
+        shininess: 0.00,
+        waveHeight: 20.00,
+        waveSpeed: 0.25,
+        zoom: 0.65
+      });
+    } else {
+      console.warn('VANTA library not loaded.');
+    }
+  </script>
+
+  <!-- CONTACT FORM MAILTO SCRIPT -->
   <script>
     (function () {
       const FORM_RECIPIENT = 'cookies.development1@gmail.com';
@@ -282,40 +368,248 @@
       });
     })();
   </script>
-</section>
-      </div>
-    </section>
-    <footer class="container mx-auto px-4 py-6 text-center opacity-75 text-sm">
-      <p>© 2025 Ravescore. All rights reserved.</p>
-    </footer>
-  </div>
 
-  <!-- Libraries (loaded at end for performance) -->
-  <script src="https://unpkg.com/feather-icons"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
+  <!-- UPDATE POPUP (ADDED) -->
+  <script>
+    (function () {
+      // CHANGE THIS VERSION STRING WHENEVER YOU PUSH A NEW UPDATE
+      const SITE_VERSION = '2.0.0';
+      const VERSION_KEY = 'ravescore_version_seen';
+
+      // Do not break if localStorage is not available
+      let seenVersion = null;
+      try {
+        seenVersion = localStorage.getItem(VERSION_KEY);
+      } catch (e) {
+        console.warn('localStorage unavailable:', e);
+      }
+
+      // If user already saw this version, do nothing
+      if (seenVersion === SITE_VERSION) return;
+
+      // Create styles for popup (scoped)
+      const style = document.createElement('style');
+      style.textContent = `
+        #rs-update-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;display:flex;align-items:center;justify-content:center}
+        #rs-update-card{background:#0b0b0b;color:#fff;padding:28px;border-radius:16px;max-width:520px;width:calc(100% - 40px);box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,0.04);position:relative;font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+        #rs-update-card .rs-title{font-family:'Bebas Neue',cursive;font-size:28px;color:#ff2b6d;margin:0 0 6px}
+        #rs-update-card .rs-sub{opacity:.8;margin-bottom:12px}
+        #rs-update-card .rs-body{background:#111;padding:12px;border-radius:8px;margin-bottom:12px;font-size:14px;opacity:.95}
+        #rs-update-close{position:absolute;top:10px;right:12px;background:transparent;border:0;color:#ccc;font-size:22px;cursor:pointer;padding:6px;border-radius:6px}
+        #rs-update-close:hover{color:#ff6b97}
+        #rs-update-card ul{margin:6px 0 0 18px;padding:0}
+        #rs-update-card p.rs-foot{font-size:12px;opacity:.7;margin:0}
+      `;
+      document.head.appendChild(style);
+
+      // Build popup DOM
+      const overlay = document.createElement('div');
+      overlay.id = 'rs-update-overlay';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', 'Ravescore Update Notification');
+
+      const card = document.createElement('div');
+      card.id = 'rs-update-card';
+      card.innerHTML = `
+        <button id="rs-update-close" aria-label="Close update notification">&times;</button>
+        <h3 class="rs-title">Website Updated!</h3>
+        <div class="rs-sub">Welcome to the latest version of <strong>Ravescore</strong>.</div>
+        <div class="rs-body">
+          <p style="margin:0 0 8px">What's new in <strong>${SITE_VERSION}</strong>:</p>
+          <ul>
+            <li>Improved visuals and animations</li>
+            <li>Performance and load-time enhancements</li>
+            <li>Small bug fixes and accessibility improvements</li>
+          </ul>
+        </div>
+        <p class="rs-foot">You won't see this again until we release another update.</p>
+      `;
+
+      overlay.appendChild(card);
+      document.body.appendChild(overlay);
+
+      // Prevent background scroll while popup visible
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+
+      // Close button: only way to close (no backdrop click, no ESC)
+      const closeBtn = document.getElementById('rs-update-close');
+      closeBtn.addEventListener('click', function () {
+        try {
+          localStorage.setItem(VERSION_KEY, SITE_VERSION);
+        } catch (e) {
+          console.warn('Could not write version to localStorage:', e);
+        }
+        // remove overlay and restore scrolling
+        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+      });
+
+      // Set focus to close button so keyboard users can easily close
+      closeBtn.focus();
+    })();
+  </script>
+
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
 
   <script>
-    feather.replace();
-    if (typeof VANTA !== 'undefined') {
-      VANTA.WAVES({
-        el: "#vanta-bg",
-        mouseControls: true,
-        touchControls: true,
-        gyroControls: false,
-        minHeight: 200.00,
-        minWidth: 200.00,
-        scale: 1.00,
-        scaleMobile: 1.00,
-        color: 0x1a1a1a,
-        shininess: 0.00,
-        waveHeight: 20.00,
-        waveSpeed: 0.25,
-        zoom: 0.65
+    // --- Robust YouTube music integration (only music-related code changed) ---
+    // Video ID from your URL: Lpjcm1F8tY8 (starts ~0:24 in link, we set start=22s)
+    const YT_VIDEO_ID = 'Lpjcm1F8tY8';
+    let player = null;
+    let playerReady = false;
+    let userClickedStart = false;
+    let musicPlaying = false;
+    const INTRO_BURST_MS = 2800; // duration of burst animation
+    const FADE_IN_MS = 2000; // fade-in length
+    const FADE_TARGET_VOLUME = 50; // 0-100
+
+    // Create the player when API ready
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('youtube-music', {
+        height: '0',
+        width: '0',
+        videoId: YT_VIDEO_ID,
+        playerVars: {
+          autoplay: 0,
+          start: 22,            // start at 22s
+          loop: 1,
+          playlist: YT_VIDEO_ID, // required for loop
+          controls: 0,
+          modestbranding: 1,
+          disablekb: 1,
+          playsinline: 1
+        },
+        events: {
+          onReady: function () {
+            playerReady = true;
+            try { player.setVolume(0); } catch(e){/*ignore*/}
+
+            // If user already clicked start before player ready, start playback silently now
+            if (userClickedStart && !musicPlaying) {
+              try { player.playVideo(); musicPlaying = true; } catch(e){ console.warn('playVideo on ready failed', e); }
+            }
+          },
+          onStateChange: function(e){
+            // no-op for now
+          }
+        }
       });
-    } else {
-      console.warn('VANTA library not loaded.');
     }
+
+    // Fade helpers (volume 0-100)
+    function fadeTo(targetVolume, duration = FADE_IN_MS) {
+      if (!player || typeof player.setVolume !== 'function') return;
+      const steps = Math.max(1, Math.round(duration / 50));
+      let current = player.getVolume ? player.getVolume() : 0;
+      const diff = (targetVolume - current);
+      let stepIndex = 0;
+      const interval = setInterval(() => {
+        stepIndex++;
+        const next = current + (diff * (stepIndex / steps));
+        player.setVolume(Math.round(Math.max(0, Math.min(100, next))));
+        if (stepIndex >= steps) {
+          clearInterval(interval);
+        }
+      }, 50);
+    }
+
+    // Start Experience logic (only triggered by user click)
+    const startBtn = document.getElementById('start-experience-btn');
+    startBtn.addEventListener('click', function (ev) {
+      // Mark that user interacted so we can start playback even if player not yet ready
+      userClickedStart = true;
+
+      // If player is ready, start playback silently immediately (satisfies gesture)
+      if (playerReady && player) {
+        try {
+          // start playback muted (volume 0) immediately to satisfy autoplay policy
+          player.setVolume(0);
+          player.playVideo();
+          musicPlaying = true;
+        } catch (err) {
+          console.warn('player.playVideo() failed on click:', err);
+        }
+      }
+      // If player not ready, onReady will start playback.
+
+      // Play intro burst animation on the logo (ensures full animation)
+      const introLogo = document.getElementById('intro-logo');
+      // add class to trigger burst; if already was animated this won't break
+      introLogo.classList.add('animate-burst-logo');
+
+      // Keep intro visible for full burst duration, then fade out and remove.
+      // We'll begin audible fade-in shortly before remove for a smooth transition.
+      setTimeout(() => {
+        // Start fading intro visually
+        const intro = document.getElementById('intro-screen');
+        intro.style.opacity = '0';
+
+        // Make music audible (fade in) right when intro starts fading
+        if (player && musicPlaying) {
+          // fade to target volume smoothly
+          fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS);
+        } else if (player && !musicPlaying) {
+          // If player wasn't playing yet but is ready, start it and fade in
+          try { player.playVideo(); musicPlaying = true; fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); } catch(e){ console.warn(e); }
+        } else {
+          // player not ready yet — when onReady runs it will play (see above)
+          // and we still want to fade in when it does — to keep simple, poll until ready
+          const readyPoll = setInterval(()=>{
+            if (playerReady && player && !musicPlaying){
+              try { player.setVolume(0); player.playVideo(); musicPlaying=true; fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(readyPoll); }
+              catch(e){ console.warn(e); }
+            } else if (playerReady && player && musicPlaying) {
+              fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS);
+              clearInterval(readyPoll);
+            }
+          }, 200);
+        }
+
+        // Show music controls (pause/resume)
+        const mc = document.getElementById('music-controls');
+        mc.style.display = 'flex';
+        mc.setAttribute('aria-hidden', 'false');
+
+        // Remove intro after fade complete
+        setTimeout(()=>{ const intro = document.getElementById('intro-screen'); if(intro && intro.parentNode) intro.parentNode.removeChild(intro); }, 800);
+      }, INTRO_BURST_MS);
+    });
+
+    // Pause / Resume buttons
+    const pauseBtn = document.getElementById('pause-music');
+    const resumeBtn = document.getElementById('resume-music');
+    pauseBtn.addEventListener('click', function () {
+      if (!player) return;
+      // fade out then pause
+      fadeTo(0, 600);
+      setTimeout(()=>{ try{ player.pauseVideo(); } catch(e){/*ignore*/} }, 650);
+    });
+    resumeBtn.addEventListener('click', function () {
+      if (!player) return;
+      try { player.playVideo(); } catch(e){ console.warn(e); }
+      // fade back in
+      setTimeout(()=> { fadeTo(FADE_TARGET_VOLUME, 800); }, 80);
+    });
+
+    // Pause music when tab hidden, resume when visible (optional friendly behavior)
+    document.addEventListener('visibilitychange', () => {
+      if (!player) return;
+      try {
+        if (document.hidden) {
+          // quickly lower volume (not abrupt)
+          fadeTo(0, 300);
+        } else {
+          // restore
+          fadeTo(FADE_TARGET_VOLUME, 800);
+        }
+      } catch (e) { /* ignore */ }
+    });
   </script>
+
+  <div id="youtube-music"></div>
 </body>
-          </html>
+</html>
