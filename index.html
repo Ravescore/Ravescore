@@ -65,11 +65,31 @@
       cursor: pointer;
       backdrop-filter: blur(4px);
       transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
     .radio-button:hover {
       transform: translateY(-4px);
       background: rgba(255,43,109,0.08);
       box-shadow: 0 8px 30px rgba(255,43,109,0.06);
+    }
+
+    /* playing-dot: small visual indicator on the radio button */
+    .playing-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: #ff2b6d;
+      box-shadow: 0 6px 18px rgba(255,43,109,0.18);
+      display: inline-block;
+      transform: translateY(0);
+      opacity: 0;
+      transition: opacity .18s ease, transform .12s ease;
+    }
+    .radio-button.playing .playing-dot {
+      opacity: 1;
+      transform: translateY(-2px);
     }
 
     .control-button {
@@ -323,6 +343,7 @@
   </div>
 
   <!-- Radio & Music UI -->
+  <!-- radio-button now contains a small dot element appended by JS, but keeping markup unchanged -->
   <button id="radio-button" class="radio-button" aria-expanded="false" aria-controls="radio-drawer">Radio</button>
 
   <div id="radio-drawer" class="radio-drawer" aria-hidden="true" role="region" aria-label="Upcoming tracks">
@@ -548,9 +569,6 @@
   <script>
     /* ---------------------------------------
        Playlist & Player configuration
-       - Add songs to PLAYLIST as objects:
-         { title: 'Title', artist: 'Name', youtubeId: 'Lpjcm1F8tY8', start: 0 }
-       - The player will use PLAYLIST[currentIndex]
        --------------------------------------- */
     const PLAYLIST = [
       {
@@ -561,25 +579,25 @@
       }
     ];
 
-    let currentIndex = 0; // which PLAYLIST index to start with
+    let currentIndex = 0;
     const CURRENT_TRACK = () => PLAYLIST[currentIndex];
 
-    // Player + UI state
+    // Player & UI state
     let player = null;
     let playerReady = false;
     let userClickedStart = false;
-    let audioAudible = false; // true when volume > 0 (logical playing)
+    let audioAudible = false;
     const INTRO_BURST_MS = 2800;
-    const FADE_DURATION_MS = 3000; // smooth fade requested (3s)
-    const TARGET_VOLUME = 50; // 0-100 target after fade-in
+    const FADE_DURATION_MS = 3000;
+    const TARGET_VOLUME = 50;
 
-    // --- SESSION PERSISTENCE KEYS (tab-scoped) ---
-    const KEY_INTRO_PLAYED = 'ravescore_intro_played'; // value '1'
-    const KEY_MUSIC_TIME = 'ravescore_music_time'; // seconds
-    const KEY_MUSIC_PLAYING = 'ravescore_music_playing'; // '1' or '0'
-    const KEY_MUSIC_INDEX = 'ravescore_music_index'; // integer
+    // Session keys (tab-scoped)
+    const KEY_INTRO_PLAYED = 'ravescore_intro_played';
+    const KEY_MUSIC_TIME = 'ravescore_music_time';
+    const KEY_MUSIC_PLAYING = 'ravescore_music_playing';
+    const KEY_MUSIC_INDEX = 'ravescore_music_index';
 
-    // read session info
+    // read session values
     const sessionIntroPlayed = sessionStorage.getItem(KEY_INTRO_PLAYED) === '1';
     const sessionSavedTime = parseFloat(sessionStorage.getItem(KEY_MUSIC_TIME) || '0') || 0;
     const sessionSavedPlaying = sessionStorage.getItem(KEY_MUSIC_PLAYING) === '1';
@@ -592,7 +610,7 @@
     function populateRadioList() {
       const list = document.getElementById('radio-list');
       if (!list) return;
-      list.innerHTML = ''; // clear current
+      list.innerHTML = '';
       PLAYLIST.forEach((item, idx) => {
         const node = document.createElement('div');
         node.className = 'radio-item' + (idx === currentIndex ? ' radio-current' : '');
@@ -613,7 +631,7 @@
     }
     populateRadioList();
 
-    // Build YouTube player when API is ready
+    // YouTube helpers
     function setIframeAllowAttributes() {
       try {
         if (!player || !player.getIframe) return;
@@ -641,18 +659,10 @@
     function onYouTubeIframeAPIReady() {
       const track = CURRENT_TRACK();
       player = new YT.Player('youtube-music', {
-        height: '0',
-        width: '0',
-        videoId: track.youtubeId,
+        height: '0', width: '0', videoId: track.youtubeId,
         playerVars: {
-          autoplay: 0,
-          start: track.start || 0,
-          loop: 1,
-          playlist: track.youtubeId, // loop single
-          controls: 0,
-          modestbranding: 1,
-          disablekb: 1,
-          playsinline: 1
+          autoplay: 0, start: track.start || 0, loop: 1,
+          playlist: track.youtubeId, controls: 0, modestbranding: 1, disablekb: 1, playsinline: 1
         },
         events: {
           onReady: function (e) {
@@ -660,32 +670,26 @@
             try { player.setVolume(0); } catch (err) { /*ignore*/ }
             setIframeAllowAttributes();
 
-            // If this tab already had the intro started previously, restore saved playback/time
+            // If this session already started, restore saved playback/time
             if (sessionIntroPlayed) {
-              // show control UI
               const musicToggle = document.getElementById('music-toggle');
               if (musicToggle) {
                 musicToggle.style.display = 'block';
                 musicToggle.setAttribute('aria-hidden', 'false');
               }
 
-              // Load saved index/time if applicable, then try to resume playback to saved state
               try {
-                // If saved index differs, update currentIndex and repopulate
                 if (!Number.isNaN(sessionSavedIndex) && sessionSavedIndex >= 0 && sessionSavedIndex < PLAYLIST.length) {
                   currentIndex = sessionSavedIndex;
                   populateRadioList();
                 }
 
-                // load starting at saved time (if any)
                 if (sessionSavedTime && sessionSavedTime > 0) {
                   loadCurrentTrackIntoPlayer(sessionSavedTime);
                 } else {
-                  // already created with track; but ensure correct video loaded
                   loadCurrentTrackIntoPlayer();
                 }
 
-                // If savedPlaying was true, try to play and fade to TARGET_VOLUME
                 if (sessionSavedPlaying) {
                   try {
                     player.setVolume(0);
@@ -696,31 +700,27 @@
                     console.warn('resume play failed:', err);
                   }
                 } else {
-                  // saved as not audible — keep playback muted so position advances, but set volume 0
                   try {
                     player.setVolume(0);
                     player.playVideo();
                     audioAudible = false;
                   } catch (err) {
-                    // if play blocked, it's okay — we'll remain paused until user interacts
                     console.warn('play muted failed:', err);
                   }
                 }
               } catch (err) {
                 console.warn('restore session state failed', err);
               }
-            } else {
-              // Not a resumed session. Do nothing special (wait for user to click Start Experience).
             }
 
-            // Start periodic state save once player ready (so we can persist time)
             startPeriodicStateSave();
+            updateRadioPlayingDot(); // reflect initial playing state
           }
         }
       });
     }
 
-    // Fade utility: fades player volume from current to target over duration (ms)
+    // Fade utility
     function fadeVolumeTo(targetVolume, duration = FADE_DURATION_MS) {
       if (!player || typeof player.getVolume !== 'function' || typeof player.setVolume !== 'function') return;
       let current = 0;
@@ -736,24 +736,34 @@
       }, 50);
     }
 
-    // Restore scrolling helper (ensure update popup is respected)
-    function restoreScrollingIfNoPopup() {
-      if (document.getElementById('rs-update-overlay')) return;
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
-    }
-
-    // DOM references
+    // DOM refs
     const startBtn = document.getElementById('start-experience-btn');
     const musicToggle = document.getElementById('music-toggle');
     const radioButton = document.getElementById('radio-button');
     const radioDrawer = document.getElementById('radio-drawer');
     const centerResume = document.getElementById('music-resume-center');
 
+    // create & append playing-dot inside radioButton
+    (function createDot() {
+      if (!radioButton) return;
+      const dot = document.createElement('span');
+      dot.className = 'playing-dot';
+      // append the dot (keeps the existing "Radio" text)
+      radioButton.appendChild(dot);
+    })();
+
+    // helper to update dot/class based on audioAudible
+    function updateRadioPlayingDot() {
+      if (!radioButton) return;
+      if (audioAudible) radioButton.classList.add('playing');
+      else radioButton.classList.remove('playing');
+    }
+
     // Save state helper (writes to sessionStorage)
     function saveStateToSession() {
       try {
-        sessionStorage.setItem(KEY_INTRO_PLAYED, sessionStorage.getItem(KEY_INTRO_PLAYED) || (userClickedStart ? '1' : sessionIntroPlayed ? '1' : '0'));
+        // mark intro played if userClickedStart or session already had it
+        if (userClickedStart) sessionStorage.setItem(KEY_INTRO_PLAYED, '1');
         if (player && playerReady && typeof player.getCurrentTime === 'function') {
           const t = player.getCurrentTime();
           if (isFinite(t)) sessionStorage.setItem(KEY_MUSIC_TIME, String(Math.floor(t)));
@@ -777,41 +787,27 @@
       }
     }
 
-    // Start Experience: user gesture required to allow audio
+    // Start Experience button
     startBtn.addEventListener('click', function () {
       userClickedStart = true;
-
-      // mark intro started in this session/tab
       try { sessionStorage.setItem(KEY_INTRO_PLAYED, '1'); } catch(e){}
 
-      // if player ready, start muted now (counts as user gesture)
       if (playerReady && player) {
-        try {
-          player.setVolume(0);
-          setIframeAllowAttributes();
-          player.playVideo();
-        } catch (err) {
-          console.warn('player.playVideo() failed on click:', err);
-        }
+        try { player.setVolume(0); setIframeAllowAttributes(); player.playVideo(); } catch (err) { console.warn('player.playVideo() failed on click:', err); }
       }
 
-      // animation
       const introLogo = document.getElementById('intro-logo');
       introLogo.classList.add('animate-burst-logo');
 
-      // keep intro for burst duration, then fade and reveal site
       setTimeout(() => {
         const intro = document.getElementById('intro-screen');
         intro.style.opacity = '0';
 
-        // start or fade-in audio
         if (player && playerReady) {
-          // ensure playback started (may already be playing muted)
           try { player.playVideo(); } catch(e){}
           fadeVolumeTo(TARGET_VOLUME, FADE_DURATION_MS);
           audioAudible = true;
         } else {
-          // poll for readiness
           const p = setInterval(() => {
             if (playerReady && player) {
               try { player.setVolume(0); player.playVideo(); } catch(e){}
@@ -822,30 +818,28 @@
           }, 250);
         }
 
-        // show the control button (single toggle next to radio)
         if (musicToggle) {
           musicToggle.style.display = 'block';
           musicToggle.setAttribute('aria-hidden', 'false');
-        }
-
-        // set correct label
-        if (musicToggle) {
           musicToggle.textContent = audioAudible ? 'Pause' : 'Resume';
           musicToggle.setAttribute('aria-pressed', audioAudible ? 'true' : 'false');
         }
 
-        // restore scrolling unless popup present
-        restoreScrollingIfNoPopup();
+        updateRadioPlayingDot();
 
-        // remove intro after fade completes
+        // restore scrolling unless popup present
+        if (!document.getElementById('rs-update-overlay')) {
+          document.documentElement.style.overflow = '';
+          document.body.style.overflow = '';
+        }
+
         setTimeout(()=>{ const i = document.getElementById('intro-screen'); if (i && i.parentNode) i.parentNode.removeChild(i); }, 800);
       }, INTRO_BURST_MS);
     });
 
-    // Toggle button logic: fade out (mute) or fade in (unmute)
+    // Toggle logic (pause/resume via fade)
     musicToggle.addEventListener('click', function () {
       if (!playerReady || !player) {
-        // If not ready, toggle label for UX; will take effect when ready
         audioAudible = !audioAudible;
         musicToggle.textContent = audioAudible ? 'Pause' : 'Resume';
         musicToggle.setAttribute('aria-pressed', audioAudible ? 'true' : 'false');
@@ -855,19 +849,17 @@
         } else {
           fadeVolumeTo(0, FADE_DURATION_MS);
         }
-        // persist change
+        updateRadioPlayingDot();
         saveStateToSession();
         return;
       }
 
       if (audioAudible) {
-        // fade out to 0 but KEEP playback running (silent)
         fadeVolumeTo(0, FADE_DURATION_MS);
         audioAudible = false;
         musicToggle.textContent = 'Resume';
         musicToggle.setAttribute('aria-pressed', 'false');
       } else {
-        // ensure video is playing then fade up
         try { player.playVideo(); } catch (e) {}
         fadeVolumeTo(TARGET_VOLUME, FADE_DURATION_MS);
         audioAudible = true;
@@ -875,11 +867,11 @@
         musicToggle.setAttribute('aria-pressed', 'true');
       }
 
-      // persist immediately after toggle
+      updateRadioPlayingDot();
       saveStateToSession();
     });
 
-    // Center resume fallback (kept for accessibility, will mirror toggle)
+    // center resume fallback
     centerResume.addEventListener('click', function () {
       if (!playerReady || !player) return;
       try { player.playVideo(); } catch(e){}
@@ -891,6 +883,7 @@
       centerResume.setAttribute('aria-hidden', 'true');
       musicToggle.style.display = 'block';
       musicToggle.setAttribute('aria-hidden', 'false');
+      updateRadioPlayingDot();
       saveStateToSession();
     });
 
@@ -908,15 +901,14 @@
       }
     });
 
-    // Ensure scrolling restored if intro already removed
+    // Load-time behavior
     window.addEventListener('load', ()=> {
-      // If sessionIntroPlayed true, skip intro display (this ensures returning in same tab won't show it)
+      // If sessionIntroPlayed true, remove intro element so it won't show on return in same tab
       if (sessionIntroPlayed) {
         const introElem = document.getElementById('intro-screen');
         if (introElem && introElem.parentNode) {
           try { introElem.parentNode.removeChild(introElem); } catch(e){}
         }
-        // show the small control button immediately (it will become functional once playerReady)
         if (musicToggle) {
           musicToggle.style.display = 'block';
           musicToggle.setAttribute('aria-hidden', 'false');
@@ -924,24 +916,22 @@
       }
 
       if (!document.getElementById('intro-screen') && !document.getElementById('rs-update-overlay')) {
-        restoreScrollingIfNoPopup();
+        if (document.documentElement.style) document.documentElement.style.overflow = '';
+        if (document.body.style) document.body.style.overflow = '';
       }
-      // Also set initial mobile layout if needed (CSS handles most of it)
     });
 
-    // Periodic saving and final save on unload
+    // periodic save + unload
     window.addEventListener('beforeunload', function () {
-      saveStateToSession();
+      // ensure final save
+      try { saveStateToSession(); } catch(e){}
       stopPeriodicStateSave();
     });
 
-    // Initialize YouTube API global callback
+    // Expose YouTube API callback
     window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
-
-    // Make sure radio UI reflects playlist initially
-    populateRadioList();
   </script>
 
   <div id="youtube-music"></div>
 </body>
-  </html>
+        </html>
