@@ -559,14 +559,6 @@
         youtubeId: 'Lpjcm1F8tY8',
         start: 0
       }
-      // To add another song: copy/paste another object here with youtubeId + start
-      // Example:
-      // ,{
-      //   title: 'Next Song',
-      //   artist: 'Artist Name',
-      //   youtubeId: 'ANOTHER_ID',
-      //   start: 0
-      // }
     ];
 
     let currentIndex = 0; // which PLAYLIST index to start with
@@ -581,9 +573,25 @@
     const FADE_DURATION_MS = 3000; // smooth fade requested (3s)
     const TARGET_VOLUME = 50; // 0-100 target after fade-in
 
+    // --- SESSION PERSISTENCE KEYS (tab-scoped) ---
+    const KEY_INTRO_PLAYED = 'ravescore_intro_played'; // value '1'
+    const KEY_MUSIC_TIME = 'ravescore_music_time'; // seconds
+    const KEY_MUSIC_PLAYING = 'ravescore_music_playing'; // '1' or '0'
+    const KEY_MUSIC_INDEX = 'ravescore_music_index'; // integer
+
+    // read session info
+    const sessionIntroPlayed = sessionStorage.getItem(KEY_INTRO_PLAYED) === '1';
+    const sessionSavedTime = parseFloat(sessionStorage.getItem(KEY_MUSIC_TIME) || '0') || 0;
+    const sessionSavedPlaying = sessionStorage.getItem(KEY_MUSIC_PLAYING) === '1';
+    const sessionSavedIndex = parseInt(sessionStorage.getItem(KEY_MUSIC_INDEX), 10);
+    if (!Number.isNaN(sessionSavedIndex) && sessionSavedIndex >= 0 && sessionSavedIndex < PLAYLIST.length) {
+      currentIndex = sessionSavedIndex;
+    }
+
     // Build radio UI from playlist
     function populateRadioList() {
       const list = document.getElementById('radio-list');
+      if (!list) return;
       list.innerHTML = ''; // clear current
       PLAYLIST.forEach((item, idx) => {
         const node = document.createElement('div');
@@ -616,14 +624,15 @@
       } catch (e) { console.warn('Could not set iframe allow attributes:', e); }
     }
 
-    function loadCurrentTrackIntoPlayer() {
+    function loadCurrentTrackIntoPlayer(startSeconds = undefined) {
       const track = CURRENT_TRACK();
       if (!player) return;
       try {
-        // loadVideoById is better to jump to new track if needed
-        player.loadVideoById({ videoId: track.youtubeId, startSeconds: track.start || 0 });
-        // Ensure loop of this single video: set playlist param if needed
-        // (we created player initially with current ID; loadVideoById + playlist may still loop via onStateChange)
+        if (typeof startSeconds === 'number' && !isNaN(startSeconds) && startSeconds > 0) {
+          player.loadVideoById({ videoId: track.youtubeId, startSeconds: Math.max(0, startSeconds) });
+        } else {
+          player.loadVideoById({ videoId: track.youtubeId, startSeconds: track.start || 0 });
+        }
       } catch (e) {
         console.warn('loadVideoById failed', e);
       }
@@ -651,14 +660,61 @@
             try { player.setVolume(0); } catch (err) { /*ignore*/ }
             setIframeAllowAttributes();
 
-            if (userClickedStart && !audioAudible) {
-              // start muted so we satisfy gesture
-              try { player.playVideo(); } catch (err) { console.warn('playVideo on ready failed', err); }
+            // If this tab already had the intro started previously, restore saved playback/time
+            if (sessionIntroPlayed) {
+              // show control UI
+              const musicToggle = document.getElementById('music-toggle');
+              if (musicToggle) {
+                musicToggle.style.display = 'block';
+                musicToggle.setAttribute('aria-hidden', 'false');
+              }
+
+              // Load saved index/time if applicable, then try to resume playback to saved state
+              try {
+                // If saved index differs, update currentIndex and repopulate
+                if (!Number.isNaN(sessionSavedIndex) && sessionSavedIndex >= 0 && sessionSavedIndex < PLAYLIST.length) {
+                  currentIndex = sessionSavedIndex;
+                  populateRadioList();
+                }
+
+                // load starting at saved time (if any)
+                if (sessionSavedTime && sessionSavedTime > 0) {
+                  loadCurrentTrackIntoPlayer(sessionSavedTime);
+                } else {
+                  // already created with track; but ensure correct video loaded
+                  loadCurrentTrackIntoPlayer();
+                }
+
+                // If savedPlaying was true, try to play and fade to TARGET_VOLUME
+                if (sessionSavedPlaying) {
+                  try {
+                    player.setVolume(0);
+                    player.playVideo();
+                    audioAudible = true;
+                    fadeVolumeTo(TARGET_VOLUME, FADE_DURATION_MS);
+                  } catch (err) {
+                    console.warn('resume play failed:', err);
+                  }
+                } else {
+                  // saved as not audible — keep playback muted so position advances, but set volume 0
+                  try {
+                    player.setVolume(0);
+                    player.playVideo();
+                    audioAudible = false;
+                  } catch (err) {
+                    // if play blocked, it's okay — we'll remain paused until user interacts
+                    console.warn('play muted failed:', err);
+                  }
+                }
+              } catch (err) {
+                console.warn('restore session state failed', err);
+              }
+            } else {
+              // Not a resumed session. Do nothing special (wait for user to click Start Experience).
             }
-          },
-          onStateChange: function (e) {
-            // If video ended and you want to advance playlist, you'd handle here.
-            // We keep looping the one video via playlist param.
+
+            // Start periodic state save once player ready (so we can persist time)
+            startPeriodicStateSave();
           }
         }
       });
@@ -694,9 +750,39 @@
     const radioDrawer = document.getElementById('radio-drawer');
     const centerResume = document.getElementById('music-resume-center');
 
+    // Save state helper (writes to sessionStorage)
+    function saveStateToSession() {
+      try {
+        sessionStorage.setItem(KEY_INTRO_PLAYED, sessionStorage.getItem(KEY_INTRO_PLAYED) || (userClickedStart ? '1' : sessionIntroPlayed ? '1' : '0'));
+        if (player && playerReady && typeof player.getCurrentTime === 'function') {
+          const t = player.getCurrentTime();
+          if (isFinite(t)) sessionStorage.setItem(KEY_MUSIC_TIME, String(Math.floor(t)));
+        }
+        sessionStorage.setItem(KEY_MUSIC_PLAYING, audioAudible ? '1' : '0');
+        sessionStorage.setItem(KEY_MUSIC_INDEX, String(currentIndex));
+      } catch (e) {
+        console.warn('saveStateToSession failed', e);
+      }
+    }
+
+    let periodicSaveHandle = null;
+    function startPeriodicStateSave() {
+      if (periodicSaveHandle) return;
+      periodicSaveHandle = setInterval(saveStateToSession, 2000);
+    }
+    function stopPeriodicStateSave() {
+      if (periodicSaveHandle) {
+        clearInterval(periodicSaveHandle);
+        periodicSaveHandle = null;
+      }
+    }
+
     // Start Experience: user gesture required to allow audio
     startBtn.addEventListener('click', function () {
       userClickedStart = true;
+
+      // mark intro started in this session/tab
+      try { sessionStorage.setItem(KEY_INTRO_PLAYED, '1'); } catch(e){}
 
       // if player ready, start muted now (counts as user gesture)
       if (playerReady && player) {
@@ -737,12 +823,16 @@
         }
 
         // show the control button (single toggle next to radio)
-        musicToggle.style.display = 'block';
-        musicToggle.setAttribute('aria-hidden', 'false');
+        if (musicToggle) {
+          musicToggle.style.display = 'block';
+          musicToggle.setAttribute('aria-hidden', 'false');
+        }
 
         // set correct label
-        musicToggle.textContent = audioAudible ? 'Pause' : 'Resume';
-        musicToggle.setAttribute('aria-pressed', audioAudible ? 'true' : 'false');
+        if (musicToggle) {
+          musicToggle.textContent = audioAudible ? 'Pause' : 'Resume';
+          musicToggle.setAttribute('aria-pressed', audioAudible ? 'true' : 'false');
+        }
 
         // restore scrolling unless popup present
         restoreScrollingIfNoPopup();
@@ -765,6 +855,8 @@
         } else {
           fadeVolumeTo(0, FADE_DURATION_MS);
         }
+        // persist change
+        saveStateToSession();
         return;
       }
 
@@ -782,6 +874,9 @@
         musicToggle.textContent = 'Pause';
         musicToggle.setAttribute('aria-pressed', 'true');
       }
+
+      // persist immediately after toggle
+      saveStateToSession();
     });
 
     // Center resume fallback (kept for accessibility, will mirror toggle)
@@ -796,6 +891,7 @@
       centerResume.setAttribute('aria-hidden', 'true');
       musicToggle.style.display = 'block';
       musicToggle.setAttribute('aria-hidden', 'false');
+      saveStateToSession();
     });
 
     // Radio drawer toggle
@@ -814,10 +910,29 @@
 
     // Ensure scrolling restored if intro already removed
     window.addEventListener('load', ()=> {
+      // If sessionIntroPlayed true, skip intro display (this ensures returning in same tab won't show it)
+      if (sessionIntroPlayed) {
+        const introElem = document.getElementById('intro-screen');
+        if (introElem && introElem.parentNode) {
+          try { introElem.parentNode.removeChild(introElem); } catch(e){}
+        }
+        // show the small control button immediately (it will become functional once playerReady)
+        if (musicToggle) {
+          musicToggle.style.display = 'block';
+          musicToggle.setAttribute('aria-hidden', 'false');
+        }
+      }
+
       if (!document.getElementById('intro-screen') && !document.getElementById('rs-update-overlay')) {
         restoreScrollingIfNoPopup();
       }
       // Also set initial mobile layout if needed (CSS handles most of it)
+    });
+
+    // Periodic saving and final save on unload
+    window.addEventListener('beforeunload', function () {
+      saveStateToSession();
+      stopPeriodicStateSave();
     });
 
     // Initialize YouTube API global callback
