@@ -333,15 +333,19 @@
   <button id="radio-button" class="radio-button" aria-expanded="false" aria-controls="radio-drawer">Radio</button>
 
   <div id="radio-drawer" class="radio-drawer" aria-hidden="true" role="region" aria-label="Upcoming tracks">
-    <h4>Upcoming</h4>
-    <div class="radio-item radio-current">
-      <div class="flex-1">
-        <div class="title">Martin Garrix — High On Life</div>
-        <div class="meta"></div>
-      </div>
-    </div>
-  </div>
-
+  <h4>Upcoming</h4>
+   <div class="radio-item radio-current">
+     <div class="flex-1">
+       <div class="title">Martin Garrix — High On Life</div>
+       <div class="meta"></div>
+     </div>
+   </div>
+   <div class="radio-item">
+     <div class="flex-1">
+       <div class="title">Adele — Easy On Me</div>
+     </div>
+   </div>
+ </div>
   <!-- Single control button (Pause / Resume toggle) -->
   <button id="music-toggle" class="control-button" aria-pressed="false" aria-hidden="true">Resume</button>
 
@@ -541,6 +545,7 @@
   <script>
     // --- Music / Radio logic (only music-related code changed) ---
     const YT_VIDEO_ID = 'Lpjcm1F8tY8';
+    const YT_VIDEO_ID = 'qatArIFBIOQ&t';
     let player = null;
     let playerReady = false;
     let userClickedStart = false;
