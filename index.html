@@ -40,10 +40,20 @@
 
     #intro-screen { transition: opacity 0.8s ease; }
 
+    /* Header: default desktop layout (no change) */
+    header .nav-list { display: flex; gap: 1.5rem; }
+
+    /* Mobile: stack nav items (prevent overlap) */
+    @media (max-width: 720px) {
+      header { padding-bottom: 12px; }
+      header .container { flex-direction: column; align-items: flex-start; gap: 8px; }
+      header .nav-list { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+    }
+
     /* Music / radio controls */
     .radio-button {
       position: fixed;
-      right: 92px; /* sits to the left of the control button (which is at right:18px) */
+      right: 92px; /* left of control */
       bottom: 18px;
       z-index: 99999;
       background: rgba(255,255,255,0.04);
@@ -55,11 +65,31 @@
       cursor: pointer;
       backdrop-filter: blur(4px);
       transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
     .radio-button:hover {
       transform: translateY(-4px);
       background: rgba(255,43,109,0.08);
       box-shadow: 0 8px 30px rgba(255,43,109,0.06);
+    }
+
+    /* playing-dot: small visual indicator on the radio button */
+    .playing-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: #ff2b6d;
+      box-shadow: 0 6px 18px rgba(255,43,109,0.18);
+      display: inline-block;
+      transform: translateY(0);
+      opacity: 0;
+      transition: opacity .18s ease, transform .12s ease;
+    }
+    .radio-button.playing .playing-dot {
+      opacity: 1;
+      transform: translateY(-2px);
     }
 
     .control-button {
@@ -86,6 +116,7 @@
     }
     .control-button:focus { outline: 2px solid rgba(255,43,109,0.18); outline-offset: 3px; }
 
+<<<<<<< HEAD
     .music-resume-center {
       position: fixed;
       left: 50%;
@@ -103,6 +134,8 @@
     }
     .music-resume-center:hover { transform: translateX(-50%) translateY(-3px); }
 
+=======
+>>>>>>> c4833da787c67714ec75717eba0c2ce1ed69a4da
     /* Radio drawer (bottom-right) */
     .radio-drawer {
       position: fixed;
@@ -134,6 +167,7 @@
     .radio-item .meta { font-size:13px; opacity:0.8; }
     .radio-current { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.025); }
 
+    /* small-screen fallbacks */
     @media (max-width:420px){
       .radio-drawer { width: calc(100% - 36px); right:18px; left:18px; }
       .radio-button { right: 18px; bottom: 18px; } /* fallback on tiny screens */
@@ -231,14 +265,13 @@
 
   <div class="site-content flex flex-col min-h-screen">
 
-    <!-- Header -->
     <header class="container mx-auto px-4 py-8 flex justify-between items-center fixed w-full top-0 bg-black z-0">
-      <div class="flex items-center space-x-10">
+      <div class="flex items-center space-x-10 container">
         <img src="1000020118.jpg" alt="Ravescore logo" class="h-12 w-auto rounded-md shadow-lg">
         <h1 class="title-font text-3xl tracking-wide">RAVESCORE</h1>
       </div>
       <nav aria-label="Primary">
-        <ul class="flex space-x-6">
+        <ul class="nav-list flex space-x-6">
           <li><a href="#work" class="hover:text-red-500 transition focus:outline focus:outline-2 focus:outline-offset-2">Work</a></li>
           <li><a href="#about" class="hover:text-red-500 transition focus:outline focus:outline-2 focus:outline-offset-2">About</a></li>
           <li><a href="#contact" class="hover:text-red-500 transition focus:outline focus:outline-2 focus:outline-offset-2">Contact</a></li>
@@ -280,7 +313,9 @@
     <!-- Work Section -->
     <section id="work" class="py-16 bg-black text-white">
       <h3 class="title-font text-3xl md:text-5xl mb-10 text-center">Featured Work</h3>
+
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
+
         <!-- Project 1 -->
         <a href="project1.html" class="bg-gray-900 rounded-lg shadow-lg overflow-hidden group transform hover:scale-105 transition duration-300">
           <img src="1000020118.jpg" alt="Project 1" class="w-full h-48 object-cover group-hover:opacity-90 transition duration-300">
@@ -319,91 +354,95 @@
 
     <!-- Contact Section -->
     <section id="contact" class="py-16 bg-black text-white border-t border-gray-800">
-      <div class="max-w-xl mx-auto px-4">
-        <h3 class="title-font text-3xl md:text-5xl mb-6 text-center">Contact Us</h3>
+  <div class="max-w-xl mx-auto px-4">
+    <h3 class="title-font text-3xl md:text-5xl mb-6 text-center">Contact Us</h3>
 
-        <div id="contact-success" class="hidden mb-4 rounded-md p-3 text-green-900 bg-green-100" role="status" aria-live="polite"></div>
-        <div id="contact-error" class="hidden mb-4 rounded-md p-3 text-red-900 bg-red-100" role="alert" aria-live="assertive"></div>
+    <div id="contact-success" class="hidden mb-4 rounded-md p-3 text-green-900 bg-green-100" role="status" aria-live="polite"></div>
+    <div id="contact-error" class="hidden mb-4 rounded-md p-3 text-red-900 bg-red-100" role="alert" aria-live="assertive"></div>
 
-        <form id="contact-form-mailto" class="space-y-6" novalidate>
-          <div>
-            <label for="name" class="block text-left mb-1 font-semibold">Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              required
-              placeholder="Your name"
-              class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2 focus:outline-red-600"
-            >
-          </div>
+    <form id="contact-form-mailto" class="space-y-6" novalidate>
+      <div>
+        <label for="name" class="block text-left mb-1 font-semibold">Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          required
+          placeholder="Your name"
+          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2 focus:outline-red-600"
+        >
+      </div>
 
-          <div>
-            <label for="email" class="block text-left mb-1 font-semibold">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              placeholder="Your email"
-              class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2 focus:outline-red-600"
-            >
-          </div>
+      <div>
+        <label for="email" class="block text-left mb-1 font-semibold">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          required
+          placeholder="Your email"
+          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2 focus:outline-red-600"
+        >
+      </div>
 
-          <div>
-            <label for="message" class="block text-left mb-1 font-semibold">Message</label>
-            <textarea
-              id="message"
-              name="message"
-              rows="5"
-              required
-              placeholder="Your message"
-              class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2 focus:outline-red-600"
-            ></textarea>
-          </div>
+      <div>
+        <label for="message" class="block text-left mb-1 font-semibold">Message</label>
+        <textarea
+          id="message"
+          name="message"
+          rows="5"
+          required
+          placeholder="Your message"
+          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline focus:outline-2 focus:outline-red-600"
+        ></textarea>
+      </div>
 
-          <button id="contact-submit-mailto" type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-full transition w-full">
-            Send Message
-          </button>
-        </form>
+      <button id="contact-submit-mailto" type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-full transition w-full">
+        Send Message
+      </button>
+    </form>
 
-        <p class="mt-6 text-center opacity-60">
-          Or email us at
-          <a id="plain-mail-link" href="mailto:cookies.development1@gmail.com" class="text-red-400 hover:underline">cookies.development1@gmail.com</a>
-        </p>
+    <p class="mt-6 text-center opacity-60">
+      Or email us at
+      <a id="plain-mail-link" href="mailto:cookies.development1@gmail.com" class="text-red-400 hover:underline">cookies.development1@gmail.com</a>
+    </p>
 
-        <!-- Manual fallback UI -->
-        <div id="manual-fallback" class="mt-4 text-center hidden">
-          <p class="mb-2 text-sm opacity-70">If your mail client didn't open, you can:</p>
-          <a id="manual-mailto-link" class="inline-block mb-2 text-red-400 hover:underline" href="#" target="_blank" rel="noopener">Click here to compose manually</a>
-          <div>
-            <button id="copy-msg-btn" class="text-sm px-3 py-2 border border-gray-700 rounded-md hover:bg-gray-800">Copy message to clipboard</button>
-          </div>
-        </div>
+    <!-- Manual fallback UI -->
+    <div id="manual-fallback" class="mt-4 text-center hidden">
+      <p class="mb-2 text-sm opacity-70">If your mail client didn't open, you can:</p>
+      <a id="manual-mailto-link" class="inline-block mb-2 text-red-400 hover:underline" href="#" target="_blank" rel="noopener">Click here to compose manually</a>
+      <div>
+        <button id="copy-msg-btn" class="text-sm px-3 py-2 border border-gray-700 rounded-md hover:bg-gray-800">Copy message to clipboard</button>
+      </div>
+    </div>
+  </div>
+</section>
       </div>
     </section>
-
     <footer class="container mx-auto px-4 py-6 text-center opacity-75 text-sm">
       <p>© 2025 Ravescore. All rights reserved.</p>
     </footer>
   </div>
 
   <!-- Radio & Music UI -->
+  <!-- radio-button now contains a small dot element appended by JS, but keeping markup unchanged -->
   <button id="radio-button" class="radio-button" aria-expanded="false" aria-controls="radio-drawer">Radio</button>
 
   <div id="radio-drawer" class="radio-drawer" aria-hidden="true" role="region" aria-label="Upcoming tracks">
     <h4>Upcoming</h4>
-    <div class="radio-item radio-current">
-      <div class="flex-1">
-        <div class="title">Martin Garrix — High On Life</div>
-        <div class="meta"></div>
+    <div id="radio-list">
+      <!-- Filled by script from PLAYLIST -->
+      <div class="radio-item radio-current">
+        <div class="flex-1">
+          <div class="title">Martin Garrix — High On Life</div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Single control button (Pause / Resume toggle) -->
   <button id="music-toggle" class="control-button" aria-pressed="false" aria-hidden="true">Resume</button>
 
+<<<<<<< HEAD
   <!-- small fallback center resume -->
   <button id="music-resume-center" class="music-resume-center" aria-hidden="true">Resume</button>
 
@@ -437,6 +476,12 @@
   </div>
 
   <!-- Libraries -->
+=======
+  <!-- small center resume fallback (hidden by default) -->
+  <button id="music-resume-center" class="music-resume-center" aria-hidden="true">Resume</button>
+
+  <!-- Libraries (loaded at end for performance) -->
+>>>>>>> c4833da787c67714ec75717eba0c2ce1ed69a4da
   <script src="https://unpkg.com/feather-icons"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
@@ -560,16 +605,22 @@
   <!-- UPDATE POPUP (unchanged) -->
   <script>
     (function () {
-      const SITE_VERSION = '2.0.0';
+      // CHANGE THIS VERSION STRING WHENEVER YOU PUSH A NEW UPDATE
+      const SITE_VERSION = '0.0.1 BETA';
       const VERSION_KEY = 'ravescore_version_seen';
+
+      // Do not break if localStorage is not available
       let seenVersion = null;
       try {
         seenVersion = localStorage.getItem(VERSION_KEY);
       } catch (e) {
         console.warn('localStorage unavailable:', e);
       }
+
+      // If user already saw this version, do nothing
       if (seenVersion === SITE_VERSION) return;
 
+      // Create styles for popup (scoped)
       const style = document.createElement('style');
       style.textContent = `
         #rs-update-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;display:flex;align-items:center;justify-content:center}
@@ -584,6 +635,7 @@
       `;
       document.head.appendChild(style);
 
+      // Build popup DOM
       const overlay = document.createElement('div');
       overlay.id = 'rs-update-overlay';
       overlay.setAttribute('role', 'dialog');
@@ -594,14 +646,17 @@
       card.id = 'rs-update-card';
       card.innerHTML = `
         <button id="rs-update-close" aria-label="Close update notification">&times;</button>
-        <h3 class="rs-title">Website Updated!</h3>
+        <h3 class="rs-title">Website Launch!</h3>
         <div class="rs-sub">Welcome to the latest version of <strong>Ravescore</strong>.</div>
         <div class="rs-body">
           <p style="margin:0 0 8px">What's new in <strong>${SITE_VERSION}</strong>:</p>
           <ul>
-            <li>Improved visuals and animations</li>
-            <li>Performance and load-time enhancements</li>
-            <li>Small bug fixes and accessibility improvements</li>
+            <li> Visuals and animations</li>
+            <li> Performance and load-time enhancements</li>
+            <li> Small bug fixes and accessibility improvements</li>
+            <li> Music playing In the background</li>
+            <li> In the future:</li>
+            <li> More music In the playlist, bug fixes, work 1 finished, and much more small things I'll list them In the next update</li>
           </ul>
         </div>
         <p class="rs-foot">You won't see this again until we release another update.</p>
@@ -614,6 +669,7 @@
       document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
 
+      // Close button: only way to close (no backdrop click, no ESC)
       const closeBtn = document.getElementById('rs-update-close');
       closeBtn.addEventListener('click', function () {
         try {
@@ -621,27 +677,89 @@
         } catch (e) {
           console.warn('Could not write version to localStorage:', e);
         }
+        // remove overlay and restore scrolling
         if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
         document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
       });
 
+      // Set focus to close button so keyboard users can easily close
       closeBtn.focus();
     })();
   </script>
 
   <!-- ========== MUSIC / RADIO SCRIPTS (unchanged logic) ========== -->
   <script>
+<<<<<<< HEAD
     // --- Music / Radio logic (only music-related code changed earlier)
     const YT_VIDEO_ID = 'Lpjcm1F8tY8';
+=======
+    /* ---------------------------------------
+       Playlist & Player configuration
+       --------------------------------------- */
+    const PLAYLIST = [
+      {
+        title: 'High On Life',
+        artist: 'Martin Garrix',
+        youtubeId: 'Lpjcm1F8tY8',
+        start: 0
+      }
+    ];
+
+    let currentIndex = 0;
+    const CURRENT_TRACK = () => PLAYLIST[currentIndex];
+
+    // Player & UI state
+>>>>>>> c4833da787c67714ec75717eba0c2ce1ed69a4da
     let player = null;
     let playerReady = false;
     let userClickedStart = false;
-    let musicPlaying = false;
-    const INTRO_BURST_MS = 2800; // burst animation length
-    const FADE_IN_MS = 2000;
-    const FADE_TARGET_VOLUME = 50;
+    let audioAudible = false;
+    const INTRO_BURST_MS = 2800;
+    const FADE_DURATION_MS = 3000;
+    const TARGET_VOLUME = 50;
 
+    // Session keys (tab-scoped)
+    const KEY_INTRO_PLAYED = 'ravescore_intro_played';
+    const KEY_MUSIC_TIME = 'ravescore_music_time';
+    const KEY_MUSIC_PLAYING = 'ravescore_music_playing';
+    const KEY_MUSIC_INDEX = 'ravescore_music_index';
+
+    // read session values
+    const sessionIntroPlayed = sessionStorage.getItem(KEY_INTRO_PLAYED) === '1';
+    const sessionSavedTime = parseFloat(sessionStorage.getItem(KEY_MUSIC_TIME) || '0') || 0;
+    const sessionSavedPlaying = sessionStorage.getItem(KEY_MUSIC_PLAYING) === '1';
+    const sessionSavedIndex = parseInt(sessionStorage.getItem(KEY_MUSIC_INDEX), 10);
+    if (!Number.isNaN(sessionSavedIndex) && sessionSavedIndex >= 0 && sessionSavedIndex < PLAYLIST.length) {
+      currentIndex = sessionSavedIndex;
+    }
+
+    // Build radio UI from playlist
+    function populateRadioList() {
+      const list = document.getElementById('radio-list');
+      if (!list) return;
+      list.innerHTML = '';
+      PLAYLIST.forEach((item, idx) => {
+        const node = document.createElement('div');
+        node.className = 'radio-item' + (idx === currentIndex ? ' radio-current' : '');
+        node.innerHTML = `
+          <div class="flex-1">
+            <div class="title">${item.artist} — ${item.title}</div>
+            <div class="meta">${idx === currentIndex ? 'Now playing (loop)' : 'Queued'}</div>
+          </div>
+        `;
+        list.appendChild(node);
+      });
+      if (PLAYLIST.length === 1) {
+        const more = document.createElement('div');
+        more.className = 'radio-item';
+        more.innerHTML = `<div class="flex-1"><div class="title">(No more tracks)</div><div class="meta">Add more to the queue later</div></div>`;
+        list.appendChild(more);
+      }
+    }
+    populateRadioList();
+
+    // YouTube helpers
     function setIframeAllowAttributes() {
       try {
         if (!player || !player.getIframe) return;
@@ -652,12 +770,26 @@
       } catch (e) { console.warn('Could not set iframe allow attributes:', e); }
     }
 
+    function loadCurrentTrackIntoPlayer(startSeconds = undefined) {
+      const track = CURRENT_TRACK();
+      if (!player) return;
+      try {
+        if (typeof startSeconds === 'number' && !isNaN(startSeconds) && startSeconds > 0) {
+          player.loadVideoById({ videoId: track.youtubeId, startSeconds: Math.max(0, startSeconds) });
+        } else {
+          player.loadVideoById({ videoId: track.youtubeId, startSeconds: track.start || 0 });
+        }
+      } catch (e) {
+        console.warn('loadVideoById failed', e);
+      }
+    }
+
     function onYouTubeIframeAPIReady() {
+      const track = CURRENT_TRACK();
       player = new YT.Player('youtube-music', {
-        height: '0',
-        width: '0',
-        videoId: YT_VIDEO_ID,
+        height: '0', width: '0', videoId: track.youtubeId,
         playerVars: {
+<<<<<<< HEAD
           autoplay: 0,
           start: 0, // starts at 0:00
           loop: 1,
@@ -666,61 +798,143 @@
           modestbranding: 1,
           disablekb: 1,
           playsinline: 1
+=======
+          autoplay: 0, start: track.start || 0, loop: 1,
+          playlist: track.youtubeId, controls: 0, modestbranding: 1, disablekb: 1, playsinline: 1
+>>>>>>> c4833da787c67714ec75717eba0c2ce1ed69a4da
         },
         events: {
-          onReady: function () {
+          onReady: function (e) {
             playerReady = true;
-            try { player.setVolume(0); } catch(e){}
+            try { player.setVolume(0); } catch (err) { /*ignore*/ }
             setIframeAllowAttributes();
-            if (userClickedStart && !musicPlaying) {
-              try { player.playVideo(); musicPlaying = true; } catch(e){ console.warn(e); }
+
+            // If this session already started, restore saved playback/time
+            if (sessionIntroPlayed) {
+              const musicToggle = document.getElementById('music-toggle');
+              if (musicToggle) {
+                musicToggle.style.display = 'block';
+                musicToggle.setAttribute('aria-hidden', 'false');
+              }
+
+              try {
+                if (!Number.isNaN(sessionSavedIndex) && sessionSavedIndex >= 0 && sessionSavedIndex < PLAYLIST.length) {
+                  currentIndex = sessionSavedIndex;
+                  populateRadioList();
+                }
+
+                if (sessionSavedTime && sessionSavedTime > 0) {
+                  loadCurrentTrackIntoPlayer(sessionSavedTime);
+                } else {
+                  loadCurrentTrackIntoPlayer();
+                }
+
+                if (sessionSavedPlaying) {
+                  try {
+                    player.setVolume(0);
+                    player.playVideo();
+                    audioAudible = true;
+                    fadeVolumeTo(TARGET_VOLUME, FADE_DURATION_MS);
+                  } catch (err) {
+                    console.warn('resume play failed:', err);
+                  }
+                } else {
+                  try {
+                    player.setVolume(0);
+                    player.playVideo();
+                    audioAudible = false;
+                  } catch (err) {
+                    console.warn('play muted failed:', err);
+                  }
+                }
+              } catch (err) {
+                console.warn('restore session state failed', err);
+              }
             }
+
+            startPeriodicStateSave();
+            updateRadioPlayingDot(); // reflect initial playing state
           }
         }
       });
     }
 
-    function fadeTo(targetVolume, duration = FADE_IN_MS) {
-      if (!player || typeof player.setVolume !== 'function') return;
+    // Fade utility
+    function fadeVolumeTo(targetVolume, duration = FADE_DURATION_MS) {
+      if (!player || typeof player.getVolume !== 'function' || typeof player.setVolume !== 'function') return;
       let current = 0;
-      try { current = player.getVolume ? player.getVolume() : 0; } catch(e){ current = 0; }
+      try { current = player.getVolume(); } catch (e) { current = 0; }
       const steps = Math.max(1, Math.round(duration / 50));
       const diff = targetVolume - current;
-      let stepIndex = 0;
-      const interval = setInterval(() => {
-        stepIndex++;
-        const next = current + (diff * (stepIndex / steps));
-        try { player.setVolume(Math.round(Math.max(0, Math.min(100, next)))); } catch(e){}
-        if (stepIndex >= steps) clearInterval(interval);
+      let idx = 0;
+      const timer = setInterval(() => {
+        idx++;
+        const next = current + diff * (idx / steps);
+        try { player.setVolume(Math.round(Math.max(0, Math.min(100, next)))); } catch (e) {}
+        if (idx >= steps) clearInterval(timer);
       }, 50);
     }
 
-    function restoreScrollingIfNoPopup() {
-      if (document.getElementById('rs-update-overlay')) return;
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
-    }
-
+    // DOM refs
     const startBtn = document.getElementById('start-experience-btn');
     const musicToggle = document.getElementById('music-toggle');
     const radioButton = document.getElementById('radio-button');
     const radioDrawer = document.getElementById('radio-drawer');
     const centerResume = document.getElementById('music-resume-center');
 
-    // Start experience click (user gesture)
+    // create & append playing-dot inside radioButton
+    (function createDot() {
+      if (!radioButton) return;
+      const dot = document.createElement('span');
+      dot.className = 'playing-dot';
+      // append the dot (keeps the existing "Radio" text)
+      radioButton.appendChild(dot);
+    })();
+
+    // helper to update dot/class based on audioAudible
+    function updateRadioPlayingDot() {
+      if (!radioButton) return;
+      if (audioAudible) radioButton.classList.add('playing');
+      else radioButton.classList.remove('playing');
+    }
+
+    // Save state helper (writes to sessionStorage)
+    function saveStateToSession() {
+      try {
+        // mark intro played if userClickedStart or session already had it
+        if (userClickedStart) sessionStorage.setItem(KEY_INTRO_PLAYED, '1');
+        if (player && playerReady && typeof player.getCurrentTime === 'function') {
+          const t = player.getCurrentTime();
+          if (isFinite(t)) sessionStorage.setItem(KEY_MUSIC_TIME, String(Math.floor(t)));
+        }
+        sessionStorage.setItem(KEY_MUSIC_PLAYING, audioAudible ? '1' : '0');
+        sessionStorage.setItem(KEY_MUSIC_INDEX, String(currentIndex));
+      } catch (e) {
+        console.warn('saveStateToSession failed', e);
+      }
+    }
+
+    let periodicSaveHandle = null;
+    function startPeriodicStateSave() {
+      if (periodicSaveHandle) return;
+      periodicSaveHandle = setInterval(saveStateToSession, 2000);
+    }
+    function stopPeriodicStateSave() {
+      if (periodicSaveHandle) {
+        clearInterval(periodicSaveHandle);
+        periodicSaveHandle = null;
+      }
+    }
+
+    // Start Experience button
     startBtn.addEventListener('click', function () {
       userClickedStart = true;
+      try { sessionStorage.setItem(KEY_INTRO_PLAYED, '1'); } catch(e){}
 
       if (playerReady && player) {
-        try {
-          player.setVolume(0);
-          setIframeAllowAttributes();
-          player.playVideo();
-          musicPlaying = true;
-        } catch (err) { console.warn('player.playVideo() failed on click:', err); }
+        try { player.setVolume(0); setIframeAllowAttributes(); player.playVideo(); } catch (err) { console.warn('player.playVideo() failed on click:', err); }
       }
 
-      // animate logo burst
       const introLogo = document.getElementById('intro-logo');
       introLogo.classList.add('animate-burst-logo');
 
@@ -728,58 +942,43 @@
         const intro = document.getElementById('intro-screen');
         intro.style.opacity = '0';
 
-        // start or fade-in music
-        if (player && musicPlaying) {
-          fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS);
-        } else if (player && !musicPlaying) {
-          try {
-            player.setVolume(0);
-            player.playVideo();
-            musicPlaying = true;
-            fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS);
-          } catch (e) {
-            console.warn('Attempt to play after burst failed:', e);
-            const readyPoll = setInterval(()=>{
-              if (playerReady && player && !musicPlaying){
-                try { player.setVolume(0); player.playVideo(); musicPlaying=true; fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(readyPoll); }
-                catch(err){ console.warn(err); }
-              } else if (playerReady && player && musicPlaying) {
-                fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(readyPoll);
-              }
-            }, 250);
-          }
+        if (player && playerReady) {
+          try { player.playVideo(); } catch(e){}
+          fadeVolumeTo(TARGET_VOLUME, FADE_DURATION_MS);
+          audioAudible = true;
         } else {
-          const readyPoll = setInterval(()=>{
+          const p = setInterval(() => {
             if (playerReady && player) {
-              try { player.setVolume(0); player.playVideo(); musicPlaying=true; fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(readyPoll); }
-              catch(e){ console.warn('Delayed start failed', e); }
+              try { player.setVolume(0); player.playVideo(); } catch(e){}
+              fadeVolumeTo(TARGET_VOLUME, FADE_DURATION_MS);
+              audioAudible = true;
+              clearInterval(p);
             }
-          }, 300);
+          }, 250);
         }
 
-        // Show the single toggle control at the right position
-        musicToggle.style.display = 'block';
-        musicToggle.setAttribute('aria-hidden', 'false');
-
-        // Initialize toggle label according to playing state
-        if (musicPlaying) {
-          musicToggle.textContent = 'Pause';
-          musicToggle.setAttribute('aria-pressed', 'true');
-        } else {
-          musicToggle.textContent = 'Resume';
-          musicToggle.setAttribute('aria-pressed', 'false');
+        if (musicToggle) {
+          musicToggle.style.display = 'block';
+          musicToggle.setAttribute('aria-hidden', 'false');
+          musicToggle.textContent = audioAudible ? 'Pause' : 'Resume';
+          musicToggle.setAttribute('aria-pressed', audioAudible ? 'true' : 'false');
         }
 
-        // restore scrolling if no update popup is present
-        restoreScrollingIfNoPopup();
+        updateRadioPlayingDot();
 
-        // remove intro after fade completes
+        // restore scrolling unless popup present
+        if (!document.getElementById('rs-update-overlay')) {
+          document.documentElement.style.overflow = '';
+          document.body.style.overflow = '';
+        }
+
         setTimeout(()=>{ const i = document.getElementById('intro-screen'); if (i && i.parentNode) i.parentNode.removeChild(i); }, 800);
       }, INTRO_BURST_MS);
     });
 
-    // Toggle button behaviour (single control)
+    // Toggle logic (pause/resume via fade)
     musicToggle.addEventListener('click', function () {
+<<<<<<< HEAD
       if (musicPlaying) {
         fadeTo(0, 600);
         setTimeout(()=>{ try { player.pauseVideo(); } catch(e){} }, 650);
@@ -792,25 +991,54 @@
         try { player.playVideo(); } catch(e){ console.warn(e); }
         setTimeout(()=>{ fadeTo(FADE_TARGET_VOLUME, 800); }, 80);
         musicPlaying = true;
+=======
+      if (!playerReady || !player) {
+        audioAudible = !audioAudible;
+        musicToggle.textContent = audioAudible ? 'Pause' : 'Resume';
+        musicToggle.setAttribute('aria-pressed', audioAudible ? 'true' : 'false');
+        if (audioAudible && playerReady) {
+          try { player.playVideo(); } catch(e){}
+          fadeVolumeTo(TARGET_VOLUME, FADE_DURATION_MS);
+        } else {
+          fadeVolumeTo(0, FADE_DURATION_MS);
+        }
+        updateRadioPlayingDot();
+        saveStateToSession();
+        return;
+      }
+
+      if (audioAudible) {
+        fadeVolumeTo(0, FADE_DURATION_MS);
+        audioAudible = false;
+        musicToggle.textContent = 'Resume';
+        musicToggle.setAttribute('aria-pressed', 'false');
+      } else {
+        try { player.playVideo(); } catch (e) {}
+        fadeVolumeTo(TARGET_VOLUME, FADE_DURATION_MS);
+        audioAudible = true;
+>>>>>>> c4833da787c67714ec75717eba0c2ce1ed69a4da
         musicToggle.textContent = 'Pause';
         musicToggle.setAttribute('aria-pressed', 'true');
-        centerResume.style.display = 'none';
-        centerResume.setAttribute('aria-hidden', 'true');
       }
+
+      updateRadioPlayingDot();
+      saveStateToSession();
     });
 
-    // center resume click (fallback) - mirrors toggle
+    // center resume fallback
     centerResume.addEventListener('click', function () {
-      if (!player) return;
-      try { player.playVideo(); } catch(e){ console.warn(e); }
-      setTimeout(()=>{ fadeTo(FADE_TARGET_VOLUME, 800); }, 80);
-      musicPlaying = true;
+      if (!playerReady || !player) return;
+      try { player.playVideo(); } catch(e){}
+      fadeVolumeTo(TARGET_VOLUME, FADE_DURATION_MS);
+      audioAudible = true;
       musicToggle.textContent = 'Pause';
       musicToggle.setAttribute('aria-pressed', 'true');
       centerResume.style.display = 'none';
       centerResume.setAttribute('aria-hidden', 'true');
       musicToggle.style.display = 'block';
       musicToggle.setAttribute('aria-hidden', 'false');
+      updateRadioPlayingDot();
+      saveStateToSession();
     });
 
     // Radio drawer toggle
@@ -827,14 +1055,28 @@
       }
     });
 
-    // make sure scrolling restored after load if intro was removed earlier
+    // Load-time behavior
     window.addEventListener('load', ()=> {
+      // If sessionIntroPlayed true, remove intro element so it won't show on return in same tab
+      if (sessionIntroPlayed) {
+        const introElem = document.getElementById('intro-screen');
+        if (introElem && introElem.parentNode) {
+          try { introElem.parentNode.removeChild(introElem); } catch(e){}
+        }
+        if (musicToggle) {
+          musicToggle.style.display = 'block';
+          musicToggle.setAttribute('aria-hidden', 'false');
+        }
+      }
+
       if (!document.getElementById('intro-screen') && !document.getElementById('rs-update-overlay')) {
-        restoreScrollingIfNoPopup();
+        if (document.documentElement.style) document.documentElement.style.overflow = '';
+        if (document.body.style) document.body.style.overflow = '';
       }
     });
   </script>
 
+<<<<<<< HEAD
   <!-- ========== FIRESTORE ADMIN PANEL SCRIPT ========== -->
   <script>
     // --- FIREBASE: Replace the object below with your Firebase project's config
@@ -985,8 +1227,19 @@
         adminPanel.style.display = 'none';
       }
     });
+=======
+    // periodic save + unload
+    window.addEventListener('beforeunload', function () {
+      // ensure final save
+      try { saveStateToSession(); } catch(e){}
+      stopPeriodicStateSave();
+    });
+
+    // Expose YouTube API callback
+    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+>>>>>>> c4833da787c67714ec75717eba0c2ce1ed69a4da
   </script>
 
   <div id="youtube-music"></div>
 </body>
-</html>
+            </html>
