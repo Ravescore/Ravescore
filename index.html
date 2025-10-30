@@ -41,7 +41,6 @@
     #intro-screen { transition: opacity 0.8s ease; }
 
     /* Music / radio controls */
-    /* radio button placed to left of toggle control */
     .radio-button {
       position: fixed;
       right: 92px; /* sits to the left of the control button (which is at right:18px) */
@@ -79,7 +78,6 @@
       transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
       display: none; /* shown after intro */
     }
-    /* Hover highlight - matches top hover feel */
     .control-button:hover {
       transform: translateY(-4px);
       background: rgba(255,43,109,0.12);
@@ -88,7 +86,6 @@
     }
     .control-button:focus { outline: 2px solid rgba(255,43,109,0.18); outline-offset: 3px; }
 
-    /* Center resume removed — we now use single control in same position; but keep resume center hidden fallback */
     .music-resume-center {
       position: fixed;
       left: 50%;
@@ -142,12 +139,74 @@
       .radio-button { right: 18px; bottom: 18px; } /* fallback on tiny screens */
       .control-button { right: 18px; bottom: 56px; } /* avoid overlap */
     }
+
+    /* ==== ADMIN GEAR + PANEL (bottom-left) ==== */
+    .admin-gear {
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      z-index: 100000;
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform .12s ease, background .12s ease;
+      backdrop-filter: blur(4px);
+    }
+    .admin-gear:hover { transform: translateY(-4px); background: rgba(255,43,109,0.06); box-shadow: 0 10px 30px rgba(255,43,109,0.06); }
+
+    .admin-panel {
+      position: fixed;
+      left: 18px;
+      bottom: 70px;
+      z-index: 100001;
+      min-width: 260px;
+      max-width: calc(100% - 36px);
+      background: rgba(11,11,11,0.98);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,0.04);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+      display: none;
+      color: #fff;
+      font-size: 14px;
+      backdrop-filter: blur(6px);
+    }
+    .admin-panel h4 { margin: 0 0 6px 0; font-family: 'Bebas Neue', cursive; color: #ff2b6d; font-size: 16px; }
+    .admin-input { width:100%; padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06); background:#0b0b0b;color:#fff;margin-bottom:8px; }
+    .admin-btn { width:100%; padding:8px;border-radius:8px;border:none;background:#ff2b6d;color:#fff;font-weight:700; cursor:pointer; }
+    .admin-secondary { width:100%; padding:8px;border-radius:8px;border:none;background:#333;color:#fff;margin-top:8px; cursor:pointer; }
+
+    /* Maintenance overlay (global) */
+    #global-maintenance-overlay {
+      display:none;
+      position: fixed;
+      inset: 0;
+      z-index: 999998;
+      background: rgba(0,0,0,0.96);
+      color: #fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding: 24px;
+      flex-direction: column;
+      gap: 12px;
+      font-family: 'Bebas Neue', cursive;
+      font-size: clamp(18px, 3.2vw, 36px);
+    }
+    #global-maintenance-overlay p { margin:0; opacity:0.95; }
   </style>
 </head>
 <body class="bg-black text-white">
 
   <!-- ✨ RAVESCORE INTRO ANIMATION ✨ -->
-  <div id="intro-screen" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-[9999] overflow-hidden text-center">
+  <div id="intro-screen" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-[9999] overflow-hidden text-center" role="dialog" aria-modal="true" aria-label="Intro - Start experience">
     <div class="relative flex flex-col items-center justify-center space-y-6">
       <!-- Red glowing background circle -->
       <div class="absolute inset-0 rounded-full bg-red-600 blur-3xl opacity-30 animate-pulse-slow"></div>
@@ -333,29 +392,59 @@
   <button id="radio-button" class="radio-button" aria-expanded="false" aria-controls="radio-drawer">Radio</button>
 
   <div id="radio-drawer" class="radio-drawer" aria-hidden="true" role="region" aria-label="Upcoming tracks">
-  <h4>Upcoming</h4>
-   <div class="radio-item radio-current">
-     <div class="flex-1">
-       <div class="title">Martin Garrix — High On Life</div>
-       <div class="meta"></div>
-     </div>
-   </div>
-   <div class="radio-item">
-     <div class="flex-1">
-       <div class="title">Adele — Easy On Me</div>
-     </div>
-   </div>
- </div>
+    <h4>Upcoming</h4>
+    <div id="now-playing-time" class="meta" style="margin-bottom:8px; font-weight:600;" role="status" aria-live="polite">00:00</div>
+    <div id="radio-list" aria-live="polite" aria-atomic="true">
+      <!-- JS will populate: first item = Now Playing, others = Upcoming -->
+    </div>
+  </div>
+
   <!-- Single control button (Pause / Resume toggle) -->
   <button id="music-toggle" class="control-button" aria-pressed="false" aria-hidden="true">Resume</button>
 
-  <!-- small fallback center resume if you want - kept but hidden -->
+  <!-- small fallback center resume -->
   <button id="music-resume-center" class="music-resume-center" aria-hidden="true">Resume</button>
+
+  <!-- Admin gear + panel (bottom-left) -->
+  <div id="admin-gear" class="admin-gear" title="Admin" aria-haspopup="dialog" aria-controls="admin-panel">
+    <!-- simple gear SVG -->
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09c.7 0 1.24-.36 1.51-1a1.65 1.65 0 0 0-.33-1.82L3.31 4.46A2 2 0 0 1 6.14 1.63l.06.06c.5.5 1.14.78 1.82.78.37 0 .73-.09 1.05-.26.28-.14.6-.22.92-.22H9a2 2 0 0 1 4 0h-.09c.32 0 .64.08.92.22.32.17.68.26 1.05.26.68 0 1.32-.28 1.82-.78l.06-.06A2 2 0 0 1 20.69 4.46l-.06.06c-.5.5-.78 1.14-.78 1.82 0 .37.09.73.26 1.05.14.28.22.6.22.92V9c0 .8-.36 1.54-1 1.99z" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <div id="admin-panel" class="admin-panel" role="dialog" aria-hidden="true">
+    <h4>Admin</h4>
+    <input id="admin-password" class="admin-input" type="password" placeholder="Password" aria-label="Admin password">
+    <button id="admin-login-btn" class="admin-btn">Unlock</button>
+    <div id="admin-controls" style="display:none;margin-top:10px;">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <div style="flex:1;font-weight:700;">Maintenance Mode</div>
+        <button id="maintenance-toggle" class="admin-btn" style="width:110px;background:#444;">Toggle</button>
+      </div>
+      <div id="admin-status" style="opacity:0.85;font-size:13px;">Status: <span id="maintenance-status-text">Unknown</span></div>
+      <button id="admin-lock" class="admin-secondary">Lock</button>
+    </div>
+  </div>
+
+  <!-- Global maintenance overlay (shown to all users when Firestore says maintenance:true) -->
+  <div id="global-maintenance-overlay" role="alert" aria-hidden="true">
+    <p>🚧 SITE UNDER MAINTENANCE 🚧</p>
+    <p style="font-size:16px;opacity:0.8;">We'll be back shortly — thanks for your patience.</p>
+  </div>
 
   <!-- Libraries -->
   <script src="https://unpkg.com/feather-icons"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
+
+  <!-- Firebase (compat) - keep same approach, filled with your config -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
 
   <script>
     feather.replace();
@@ -539,21 +628,91 @@
     })();
   </script>
 
-  <!-- YouTube IFrame API -->
-  <script src="https://www.youtube.com/iframe_api"></script>
-
+  <!-- ========== MUSIC / RADIO SCRIPTS (playlist + player + UI) ========== -->
   <script>
-    // --- Music / Radio logic (only music-related code changed) ---
-    const YT_VIDEO_ID = 'Lpjcm1F8tY8';
-    const YT_VIDEO_ID = 'qatArIFBIOQ&t';
+    // Playlist: add more entries easily here (title, artist, youtubeId, startSeconds)
+    const PLAYLIST = [
+      { title: 'High On Life', artist: 'Martin Garrix', youtubeId: 'Lpjcm1F8tY8', start: 0 },
+      { title: 'Lost Without You', artist: 'Headhunterz', youtubeId: 'qatArIFBIOQ', start: 0 }
+    ];
+
+    let currentIndex = 0; // index of currently playing in PLAYLIST
+    const CURRENT = () => PLAYLIST[currentIndex];
+
+    // YouTube player + state
     let player = null;
     let playerReady = false;
     let userClickedStart = false;
-    let musicPlaying = false;
-    const INTRO_BURST_MS = 2800; // burst animation length
+    let musicPlaying = false; // logical audible state (true when audible / playing)
+    const INTRO_BURST_MS = 2800;
     const FADE_IN_MS = 2000;
-    const FADE_TARGET_VOLUME = 50;
+    const FADE_TARGET_VOLUME = 50; // 0-100
 
+    // Timer for elapsed display (updates while drawer open)
+    let elapsedInterval = null;
+
+    // Populate radio list UI (Now Playing + Upcoming)
+    function populateRadioUI() {
+      const list = document.getElementById('radio-list');
+      if (!list) return;
+      list.innerHTML = '';
+      PLAYLIST.forEach((item, idx) => {
+        const node = document.createElement('div');
+        node.className = 'radio-item' + (idx === currentIndex ? ' radio-current' : '');
+        node.innerHTML = `
+          <div style="flex:1">
+            <div class="title">${item.artist} — ${item.title}</div>
+            <div class="meta">${idx === currentIndex ? 'Now playing' : 'Upcoming'}</div>
+          </div>
+        `;
+        list.appendChild(node);
+      });
+
+      // update small label for screen readers
+      try {
+        const nowLabel = document.getElementById('now-playing-time');
+        if (nowLabel) nowLabel.setAttribute('aria-label', `Now playing: ${PLAYLIST[currentIndex].artist} ${PLAYLIST[currentIndex].title}`);
+      } catch (e) {}
+    }
+    populateRadioUI();
+
+    // YouTube API helper: once API loads, this callback is called by their script
+    function onYouTubeIframeAPIReady() {
+      const t = CURRENT();
+      try {
+        player = new YT.Player('youtube-music', {
+          height: '0',
+          width: '0',
+          videoId: t.youtubeId,
+          playerVars: {
+            autoplay: 0,
+            start: t.start || 0,
+            loop: 0, // we handle playlist loop ourselves
+            controls: 0,
+            modestbranding: 1,
+            rel: 0,
+            disablekb: 1,
+            playsinline: 1
+          },
+          events: {
+            onReady: (e) => {
+              playerReady = true;
+              try { player.setVolume(0); } catch(e){}
+              setIframeAllowAttributes();
+              // if user already clicked start (rare), begin playing muted so gesture satisfied
+              if (userClickedStart && !musicPlaying) {
+                try { player.playVideo(); } catch(e){ console.warn('play muted after ready failed', e); }
+              }
+            },
+            onStateChange: onPlayerStateChange
+          }
+        });
+      } catch (err) {
+        console.warn('YT Player init failed', err);
+      }
+    }
+
+    // Make iframe allow attributes friendly
     function setIframeAllowAttributes() {
       try {
         if (!player || !player.getIframe) return;
@@ -564,34 +723,36 @@
       } catch (e) { console.warn('Could not set iframe allow attributes:', e); }
     }
 
-    function onYouTubeIframeAPIReady() {
-      player = new YT.Player('youtube-music', {
-        height: '0',
-        width: '0',
-        videoId: YT_VIDEO_ID,
-        playerVars: {
-          autoplay: 0,
-          start: 0, // now starts at 0:00
-          loop: 1,
-          playlist: YT_VIDEO_ID,
-          controls: 0,
-          modestbranding: 1,
-          disablekb: 1,
-          playsinline: 1
-        },
-        events: {
-          onReady: function () {
-            playerReady = true;
-            try { player.setVolume(0); } catch(e){}
-            setIframeAllowAttributes();
-            if (userClickedStart && !musicPlaying) {
-              try { player.playVideo(); musicPlaying = true; } catch(e){ console.warn(e); }
-            }
-          }
+    // Player state change handler (detect ended -> advance playlist)
+    function onPlayerStateChange(event) {
+      const state = event.data;
+      // 0 = ended
+      if (state === YT.PlayerState.ENDED) {
+        // advance to next track
+        currentIndex = (currentIndex + 1) % PLAYLIST.length;
+        const next = CURRENT();
+        try {
+          player.loadVideoById({ videoId: next.youtubeId, startSeconds: next.start || 0 });
+        } catch (e) {
+          console.warn('loadVideoById failed', e);
         }
-      });
+        // set volume to 0, play, then fade
+        try { player.setVolume(0); player.playVideo(); } catch (e) {}
+        setTimeout(()=>{ fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); }, 120);
+        // update UI
+        populateRadioUI();
+      }
+      // if playing, start elapsed timer
+      if (state === YT.PlayerState.PLAYING) {
+        startElapsedUpdater();
+        // update UI label
+        populateRadioUI();
+      } else {
+        stopElapsedUpdater();
+      }
     }
 
+    // Fade utility (smoothly change volume to target over duration)
     function fadeTo(targetVolume, duration = FADE_IN_MS) {
       if (!player || typeof player.setVolume !== 'function') return;
       let current = 0;
@@ -607,22 +768,60 @@
       }, 50);
     }
 
-    function restoreScrollingIfNoPopup() {
-      if (document.getElementById('rs-update-overlay')) return;
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
+    // Elapsed updater (shows MM:SS only while drawer open)
+    function formatMMSS(sec) {
+      const s = Math.floor(sec % 60);
+      const m = Math.floor(sec / 60);
+      return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    }
+    function updateElapsedDisplay() {
+      const el = document.getElementById('now-playing-time');
+      if (!el || !player || !player.getCurrentTime) return;
+      try {
+        const now = player.getCurrentTime ? player.getCurrentTime() : 0;
+        el.textContent = formatMMSS(now);
+      } catch(e) { /* ignore */ }
+    }
+    function startElapsedUpdater() {
+      stopElapsedUpdater();
+      elapsedInterval = setInterval(() => {
+        // only update when radio drawer visible
+        const drawer = document.getElementById('radio-drawer');
+        if (drawer && drawer.style.display !== 'none') {
+          updateElapsedDisplay();
+        }
+      }, 500);
+    }
+    function stopElapsedUpdater() {
+      if (elapsedInterval) { clearInterval(elapsedInterval); elapsedInterval = null; }
     }
 
+    // DOM refs
     const startBtn = document.getElementById('start-experience-btn');
     const musicToggle = document.getElementById('music-toggle');
     const radioButton = document.getElementById('radio-button');
     const radioDrawer = document.getElementById('radio-drawer');
     const centerResume = document.getElementById('music-resume-center');
 
-    // Start experience click (user gesture)
+    // If session already saw intro (sessionStorage), do not show intro in this tab
+    (function checkSessionIntro() {
+      try {
+        if (sessionStorage.getItem('ravescore_intro_seen') === 'true') {
+          const intro = document.getElementById('intro-screen');
+          if (intro && intro.parentNode) intro.parentNode.removeChild(intro);
+          // make sure music toggle reflects state if audio was created
+          musicToggle.style.display = 'block';
+          musicToggle.setAttribute('aria-hidden', 'false');
+        }
+      } catch(e){}
+    })();
+
+    // Start Experience click: must be user gesture to allow autoplay
     startBtn.addEventListener('click', function () {
       userClickedStart = true;
+      try { sessionStorage.setItem('ravescore_intro_seen','true'); } catch(e){}
 
+      // If player is ready, start playback muted (counts as user gesture)
       if (playerReady && player) {
         try {
           player.setVolume(0);
@@ -636,11 +835,12 @@
       const introLogo = document.getElementById('intro-logo');
       introLogo.classList.add('animate-burst-logo');
 
+      // keep intro for burst duration, then fade and reveal site
       setTimeout(() => {
         const intro = document.getElementById('intro-screen');
-        intro.style.opacity = '0';
+        if (intro) intro.style.opacity = '0';
 
-        // start or fade-in music
+        // start or fade-in audio right before intro removed
         if (player && musicPlaying) {
           fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS);
         } else if (player && !musicPlaying) {
@@ -650,61 +850,62 @@
             musicPlaying = true;
             fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS);
           } catch (e) {
-            console.warn('Attempt to play after burst failed:', e);
-            const readyPoll = setInterval(()=>{
-              if (playerReady && player && !musicPlaying){
-                try { player.setVolume(0); player.playVideo(); musicPlaying=true; fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(readyPoll); }
-                catch(err){ console.warn(err); }
-              } else if (playerReady && player && musicPlaying) {
-                fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(readyPoll);
+            // poll for readiness then start
+            const p = setInterval(() => {
+              if (playerReady && player) {
+                try { player.setVolume(0); player.playVideo(); musicPlaying=true; fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(p); } catch(err) { console.warn(err); }
               }
             }, 250);
           }
         } else {
-          const readyPoll = setInterval(()=>{
+          // wait for player creation
+          const p = setInterval(()=> {
             if (playerReady && player) {
-              try { player.setVolume(0); player.playVideo(); musicPlaying=true; fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(readyPoll); }
-              catch(e){ console.warn('Delayed start failed', e); }
+              try { player.setVolume(0); player.playVideo(); musicPlaying=true; fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(p); } catch(e){ console.warn(e); }
             }
           }, 300);
         }
 
-        // Show the single toggle control at the right position
+        // show single toggle control
         musicToggle.style.display = 'block';
         musicToggle.setAttribute('aria-hidden', 'false');
 
-        // Initialize toggle label according to playing state
-        if (musicPlaying) {
-          musicToggle.textContent = 'Pause';
-          musicToggle.setAttribute('aria-pressed', 'true');
-        } else {
-          musicToggle.textContent = 'Resume';
-          musicToggle.setAttribute('aria-pressed', 'false');
-        }
+        // set label
+        musicToggle.textContent = musicPlaying ? 'Pause' : 'Resume';
+        musicToggle.setAttribute('aria-pressed', musicPlaying ? 'true' : 'false');
 
-        // restore scrolling if no update popup is present
-        restoreScrollingIfNoPopup();
+        // restore scrolling unless update popup present
+        if (!document.getElementById('rs-update-overlay')) {
+          document.documentElement.style.overflow = '';
+          document.body.style.overflow = '';
+        }
 
         // remove intro after fade completes
         setTimeout(()=>{ const i = document.getElementById('intro-screen'); if (i && i.parentNode) i.parentNode.removeChild(i); }, 800);
       }, INTRO_BURST_MS);
     });
 
-    // Toggle button behaviour (single control)
+    // Toggle Pause/Resume (fade)
     musicToggle.addEventListener('click', function () {
-      // if playing, pause; if paused, resume
+      if (!playerReady || !player) {
+        // toggle state for UI while waiting
+        musicPlaying = !musicPlaying;
+        musicToggle.textContent = musicPlaying ? 'Pause' : 'Resume';
+        musicToggle.setAttribute('aria-pressed', musicPlaying ? 'true' : 'false');
+        return;
+      }
+
       if (musicPlaying) {
-        // fade out and pause
+        // fade out and then pause (keep video paused to avoid background data)
         fadeTo(0, 600);
         setTimeout(()=>{ try { player.pauseVideo(); } catch(e){} }, 650);
         musicPlaying = false;
         musicToggle.textContent = 'Resume';
         musicToggle.setAttribute('aria-pressed', 'false');
-        // also show optional center resume for visibility (kept small behavior)
         centerResume.style.display = 'block';
         centerResume.setAttribute('aria-hidden', 'false');
       } else {
-        // resume: start playback and fade to volume
+        // resume
         try { player.playVideo(); } catch(e){ console.warn(e); }
         setTimeout(()=>{ fadeTo(FADE_TARGET_VOLUME, 800); }, 80);
         musicPlaying = true;
@@ -715,7 +916,7 @@
       }
     });
 
-    // center resume click (fallback) - mirrors toggle
+    // center resume fallback
     centerResume.addEventListener('click', function () {
       if (!player) return;
       try { player.playVideo(); } catch(e){ console.warn(e); }
@@ -736,23 +937,192 @@
         radioDrawer.style.display = 'none';
         radioDrawer.setAttribute('aria-hidden', 'true');
         radioButton.setAttribute('aria-expanded', 'false');
+        stopElapsedUpdater();
       } else {
+        // update now-playing display immediately
+        populateRadioUI();
+        // reset elapsed display
+        updateElapsedDisplay();
         radioDrawer.style.display = 'block';
         radioDrawer.setAttribute('aria-hidden', 'false');
         radioButton.setAttribute('aria-expanded', 'true');
+        // start interval to update time
+        startElapsedUpdater();
       }
     });
 
-    // make sure scrolling restored after load if intro was removed earlier
+    // ensure scrolling restored if intro already removed
     window.addEventListener('load', ()=> {
       if (!document.getElementById('intro-screen') && !document.getElementById('rs-update-overlay')) {
-        restoreScrollingIfNoPopup();
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+      }
+      // if player not created yet, leave as-is. onYouTubeIframeAPIReady will init.
+    });
+
+    // Expose YouTube callback to window
+    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+  </script>
+
+  <!-- FIRESTORE ADMIN PANEL SCRIPT -->
+  <script>
+    // --- FIREBASE CONFIG: your provided values ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBZ9yZrwSKRJ8YKegX-bXoc480OEFe_0co",
+      authDomain: "ravescoreadmin.firebaseapp.com",
+      databaseURL: "https://ravescoreadmin-default-rtdb.firebaseio.com",
+      projectId: "ravescoreadmin",
+      storageBucket: "ravescoreadmin.firebasestorage.app",
+      messagingSenderId: "952715717877",
+      appId: "1:952715717877:web:e48dd4ee51e4dc7b9fe9bc",
+      measurementId: "G-FHPW7N4BJV"
+    };
+
+    // Initialize Firebase app + Firestore (compat)
+    try {
+      if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      } else {
+        // if already initialized, optionally reuse - compat handles this
+      }
+    } catch (e) {
+      console.warn('Firebase init error (maybe already initialized):', e);
+    }
+    const db = (typeof firebase !== 'undefined' && firebase.firestore) ? firebase.firestore() : null;
+
+    // Admin UI elems
+    const adminGear = document.getElementById('admin-gear');
+    const adminPanel = document.getElementById('admin-panel');
+    const adminPasswordInput = document.getElementById('admin-password');
+    const adminUnlockBtn = document.getElementById('admin-login-btn');
+    const adminControls = document.getElementById('admin-controls');
+    const maintenanceToggle = document.getElementById('maintenance-toggle');
+    const maintenanceStatusText = document.getElementById('maintenance-status-text');
+    const adminLockBtn = document.getElementById('admin-lock');
+    const overlay = document.getElementById('global-maintenance-overlay');
+
+    const ADMIN_PASSWORD = 'Cookie';
+
+    // toggle admin panel visibility
+    adminGear.addEventListener('click', () => {
+      const shown = adminPanel.style.display === 'block';
+      adminPanel.style.display = shown ? 'none' : 'block';
+      if (!shown) {
+        adminPanel.setAttribute('aria-hidden', 'false');
+        adminPasswordInput.focus();
+      } else {
+        adminPanel.setAttribute('aria-hidden', 'true');
       }
     });
 
-    // Note: intentionally do not pause music on tab visibility change (keeps playing)
+    // unlock
+    adminUnlockBtn.addEventListener('click', async () => {
+      const val = (adminPasswordInput.value || '').trim();
+      if (val === ADMIN_PASSWORD) {
+        adminControls.style.display = 'block';
+        adminPasswordInput.value = '';
+        adminPasswordInput.disabled = true;
+        adminUnlockBtn.style.display = 'none';
+        // show status
+        fetchCurrentMaintenanceStatus();
+      } else {
+        alert('Wrong password');
+      }
+    });
+
+    adminLockBtn.addEventListener('click', () => {
+      adminControls.style.display = 'none';
+      adminPasswordInput.disabled = false;
+      adminUnlockBtn.style.display = 'block';
+      adminPanel.style.display = 'none';
+    });
+
+    async function fetchCurrentMaintenanceStatus() {
+      if (!db) {
+        maintenanceStatusText.textContent = 'Firestore unavailable';
+        return;
+      }
+      try {
+        const docRef = db.collection('settings').doc('site');
+        const doc = await docRef.get();
+        const data = doc.exists ? doc.data() : null;
+        const isMaintenance = data && data.maintenanceMode === true;
+        maintenanceStatusText.textContent = isMaintenance ? 'ON' : 'OFF';
+      } catch (e) {
+        console.warn('fetchCurrentMaintenanceStatus', e);
+        maintenanceStatusText.textContent = 'Error';
+      }
+    }
+
+    // toggle maintenance in Firestore
+    maintenanceToggle.addEventListener('click', async () => {
+      if (!db) {
+        alert('Firestore not configured. Please paste your firebase config in the script.');
+        return;
+      }
+      try {
+        const docRef = db.collection('settings').doc('site');
+        const doc = await docRef.get();
+        const current = doc.exists && doc.data() && doc.data().maintenanceMode === true;
+        await docRef.set({ maintenanceMode: !current }, { merge: true });
+
+        // optimistic UI
+        maintenanceStatusText.textContent = !current ? 'ON' : 'OFF';
+
+        // fade audio accordingly
+        if (!current) {
+          try { fadeTo(0, 1200); } catch(e){}
+        } else {
+          try { if (musicPlaying) fadeTo(FADE_TARGET_VOLUME, 1200); } catch(e){}
+        }
+      } catch (e) {
+        console.warn('Toggle maintenance failed', e);
+        alert('Failed to toggle maintenance. See console.');
+      }
+    });
+
+    // Realtime listener: when Firestore value changes, show/hide overlay for all users
+    if (db) {
+      try {
+        db.collection('settings').doc('site').onSnapshot((doc) => {
+          const data = doc.exists ? doc.data() : null;
+          // only show overlay if doc exists AND maintenanceMode === true
+          const isMaintenance = data && data.maintenanceMode === true;
+
+          if (isMaintenance) {
+            overlay.style.display = 'flex';
+            overlay.setAttribute('aria-hidden', 'false');
+            // fade audio out
+            try { fadeTo(0, 1000); } catch(e){}
+          } else {
+            overlay.style.display = 'none';
+            overlay.setAttribute('aria-hidden', 'true');
+            // fade audio back in if user previously started playback
+            try { if (musicPlaying) fadeTo(FADE_TARGET_VOLUME, 1000); } catch(e){}
+          }
+
+          // update admin UI status if panel visible
+          maintenanceStatusText.textContent = isMaintenance ? 'ON' : 'OFF';
+        });
+      } catch (e) {
+        console.warn('Firestore snapshot listen failed', e);
+      }
+    }
+
+    // Close admin panel if clicked outside (but don't close when clicking inside)
+    document.addEventListener('click', (evt) => {
+      try {
+        if (!adminPanel.contains(evt.target) && !adminGear.contains(evt.target)) {
+          adminPanel.style.display = 'none';
+        }
+      } catch (e) {}
+    });
+
+    // Ensure radio UI shows Now Playing initially
+    (function initRadioUI(){ populateRadioUI(); })();
   </script>
 
+  <!-- hidden div for youtube player -->
   <div id="youtube-music"></div>
 </body>
 </html>
