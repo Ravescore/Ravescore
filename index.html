@@ -201,15 +201,12 @@
       font-size: clamp(18px, 3.2vw, 36px);
     }
     #global-maintenance-overlay p { margin:0; opacity:0.95; }
-
-    /* tiny visually-hidden utility for accessible aria updates */
-    .sr-only { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
   </style>
 </head>
 <body class="bg-black text-white">
 
   <!-- ✨ RAVESCORE INTRO ANIMATION ✨ -->
-  <div id="intro-screen" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-[9999] overflow-hidden text-center" role="dialog" aria-modal="true" aria-label="Intro - Start experience">
+  <div id="intro-screen" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-[9999] overflow-hidden text-center">
     <div class="relative flex flex-col items-center justify-center space-y-6">
       <!-- Red glowing background circle -->
       <div class="absolute inset-0 rounded-full bg-red-600 blur-3xl opacity-30 animate-pulse-slow"></div>
@@ -396,8 +393,8 @@
 
   <div id="radio-drawer" class="radio-drawer" aria-hidden="true" role="region" aria-label="Upcoming tracks">
     <h4>Upcoming</h4>
-    <div id="now-playing-time" class="meta" style="margin-bottom:8px; font-weight:600;" role="status" aria-live="polite">00:00</div>
-    <div id="radio-list" aria-live="polite" aria-atomic="true">
+    <div id="now-playing-time" class="meta" style="margin-bottom:8px; font-weight:600;">00:00</div>
+    <div id="radio-list">
       <!-- JS will populate: first item = Now Playing, others = Upcoming -->
     </div>
   </div>
@@ -409,7 +406,7 @@
   <button id="music-resume-center" class="music-resume-center" aria-hidden="true">Resume</button>
 
   <!-- Admin gear + panel (bottom-left) -->
-  <div id="admin-gear" class="admin-gear" title="Admin" aria-haspopup="dialog" aria-controls="admin-panel">
+  <div id="admin-gear" class="admin-gear" title="Admin">
     <!-- simple gear SVG -->
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
       <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -446,10 +443,10 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+
   <script>
-    /*******************************
-     * Small initial UI bootstraps
-     *******************************/
     feather.replace();
     if (typeof VANTA !== 'undefined') {
       VANTA.WAVES({
@@ -631,112 +628,32 @@
     })();
   </script>
 
-  <!-- ========== MUSIC / RADIO SCRIPTS (GITHUB MP3s player + UI) ========== -->
+  <!-- ========== MUSIC / RADIO SCRIPTS (playlist + player + UI) ========== -->
   <script>
-<<<<<<< HEAD
-    /*****************************************************************************
-     * MP3 player using files hosted in your GitHub repo (raw.githubusercontent.com)
-     * Replaced YouTube logic with direct fetch -> blob -> Audio object URLs.
-     * Keeps the same UI behavior: Start Experience must be clicked, fade, toggle.
-     *****************************************************************************/
-
-    // Playlist: filenames (exact names as in your repo root)
+    // Playlist: add more entries easily here (title, artist, youtubeId, startSeconds)
     const PLAYLIST = [
-      { title: 'High On Life', artist: 'Martin Garrix', file: 'MartinGarrix_HighOnLife.mp3.mp3' },
-      { title: 'Lost Without You', artist: 'Headhunterz', file: 'Headhunterz & Vertile ft. Sian Evans - Lost Without You (Defqon.1 2023 Closing Theme).mp3' }
+      { title: 'High On Life', artist: 'Martin Garrix', youtubeId: 'Lpjcm1F8tY8', start: 0 },
+      { title: 'Lost Without You', artist: 'Headhunterz', youtubeId: 'qatArIFBIOQ', start: 0 }
     ];
-
-    // Your GitHub raw base (username 'Ravescore' / repo 'Ravescore' / branch 'main')
-    const GITHUB_BASE = "https://raw.githubusercontent.com/Ravescore/Ravescore/main/";
-
-    // UI & state
-    let currentIndex = 0;
-    const CURRENT = () => PLAYLIST[currentIndex];
-
-    // Audio elements (A/B) to allow seamless crossfade
-    const audioA = document.createElement('audio');
-    const audioB = document.createElement('audio');
-    [audioA, audioB].forEach(a => { a.preload = 'auto'; a.crossOrigin = 'anonymous'; a.style.display='none'; document.body.appendChild(a); });
-
-    let activePlayer = 'A'; // 'A' or 'B'
-    function getActiveAudio(){ return activePlayer === 'A' ? audioA : audioB; }
-    function getInactiveAudio(){ return activePlayer === 'A' ? audioB : audioA; }
-    function flipActive(){ activePlayer = (activePlayer === 'A' ? 'B' : 'A'); }
-
-    const FADE_TARGET_VOLUME = 0.5; // 0..1
-    const INTRO_BURST_MS = 2800;
-    const FADE_IN_MS = 2000;
-
-    let musicPlaying = false;
-    let userClickedStart = false;
-    let elapsedInterval = null;
-
-    // DOM refs
-    const startBtn = document.getElementById('start-experience-btn');
-    const musicToggle = document.getElementById('music-toggle');
-    const radioButton = document.getElementById('radio-button');
-    const radioDrawer = document.getElementById('radio-drawer');
-    const centerResume = document.getElementById('music-resume-center');
-=======
-    // ======= Playlist: replace youtube entries with GitHub-hosted mp3s =======
-    // Set this to your raw GitHub path (replace placeholders):
-    const GITHUB_BASE = "https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_REPO/main/";
-
-    // File names (exact names in your repo). We will URL-encode them.
-    const PLAYLIST = [
-      {
-        title: 'High On Life',
-        artist: 'Martin Garrix',
-        file: 'MartinGarrix_HighOnLife.mp3.mp3'
-      },
-      {
-        title: 'Lost Without You',
-        artist: 'Headhunterz',
-        file: 'Headhunterz & Vertile ft. Sian Evans - Lost Without You (Defqon.1 2023 Closing Theme).mp3'
-      }
-    ];
-
-    // computed full URLs
-    PLAYLIST.forEach(p => { p.url = GITHUB_BASE + encodeURIComponent(p.file); });
 
     let currentIndex = 0; // index of currently playing in PLAYLIST
     const CURRENT = () => PLAYLIST[currentIndex];
 
-    // Audio players (two for crossfade)
-    const audioA = document.createElement('audio');
-    const audioB = document.createElement('audio');
-    audioA.preload = 'auto';
-    audioB.preload = 'auto';
-    audioA.crossOrigin = "anonymous";
-    audioB.crossOrigin = "anonymous";
-    // keep them visually hidden and out of layout
-    audioA.style.display = 'none';
-    audioB.style.display = 'none';
-    document.body.appendChild(audioA);
-    document.body.appendChild(audioB);
-
-    // player state
-    let activePlayer = 'A'; // 'A' or 'B' (which audio element currently audible)
-    let musicPlaying = false; // logical audible state
+    // YouTube player + state
+    let player = null;
+    let playerReady = false;
     let userClickedStart = false;
+    let musicPlaying = false; // logical audible state (true when audible / playing)
     const INTRO_BURST_MS = 2800;
     const FADE_IN_MS = 2000;
-    const FADE_TARGET_VOLUME = 0.5; // 0..1 (converted from earlier 0-100)
-    const CROSSFADE_SECS = 5; // seconds to crossfade
+    const FADE_TARGET_VOLUME = 50; // 0-100
 
-    // helper to get DOM refs
-    const startBtn = document.getElementById('start-experience-btn');
-    const musicToggle = document.getElementById('music-toggle');
-    const radioButton = document.getElementById('radio-button');
-    const radioDrawer = document.getElementById('radio-drawer');
-    const centerResume = document.getElementById('music-resume-center');
-
-    // elapsed timer update
+    // Timer for elapsed display (updates while drawer open)
     let elapsedInterval = null;
 
+    // Populate radio list UI (Now Playing + Upcoming)
     function populateRadioUI() {
       const list = document.getElementById('radio-list');
-      if (!list) return;
       list.innerHTML = '';
       PLAYLIST.forEach((item, idx) => {
         const node = document.createElement('div');
@@ -747,227 +664,117 @@
             <div class="meta">${idx === currentIndex ? 'Now playing' : 'Upcoming'}</div>
           </div>
         `;
-        node.addEventListener('click', () => {
-          // immediate jump to selected track with crossfade
-          startTrackByIndex(idx);
-        });
         list.appendChild(node);
       });
-
-      // update screen-reader label for small element
-      try {
-        const nowLabel = document.getElementById('now-playing-time');
-        if (nowLabel) nowLabel.setAttribute('aria-label', `Now playing: ${PLAYLIST[currentIndex].artist} ${PLAYLIST[currentIndex].title}`);
-      } catch (e) {}
-    }
-
-    // get active / inactive audio elements
-    function getActiveAudio() { return activePlayer === 'A' ? audioA : audioB; }
-    function getInactiveAudio() { return activePlayer === 'A' ? audioB : audioA; }
-
-    // Fade helper: targetVolume 0..1, duration ms
-    function fadeAudioTo(audioEl, targetVol, duration = FADE_IN_MS) {
-      try {
-        if (!audioEl) return;
-        targetVol = Math.max(0, Math.min(1, targetVol));
-        // clear any existing fade interval on the element
-        if (audioEl._fadeInterval) { clearInterval(audioEl._fadeInterval); audioEl._fadeInterval = null; }
-        const start = Number(audioEl.volume) || 0;
-        const steps = Math.max(1, Math.round(duration / 50));
-        const diff = targetVol - start;
-        let stepIndex = 0;
-        audioEl._fadeInterval = setInterval(() => {
-          stepIndex++;
-          const next = start + (diff * (stepIndex / steps));
-          audioEl.volume = Math.max(0, Math.min(1, next));
-          if (stepIndex >= steps) {
-            clearInterval(audioEl._fadeInterval);
-            audioEl._fadeInterval = null;
-            audioEl.volume = targetVol;
-          }
-        }, 50);
-      } catch (e) { console.warn('fadeAudioTo error', e); }
-    }
-
-    // Global fadeTo to match old API (0-100 percent)
-    function fadeTo(percent, duration = FADE_IN_MS) {
-      const vol = Math.max(0, Math.min(100, percent)) / 100;
-      // fade active audio to vol
-      const a = getActiveAudio();
-      fadeAudioTo(a, vol, duration);
-    }
-
-    // schedule crossfade when current audio is reaching end
-    function attachScheduling(audioEl) {
-      if (!audioEl) return;
-      // ensure we don't double attach
-      audioEl._schedulingAttached = true;
-      const onTime = () => {
-        if (!audioEl.duration || audioEl.duration === Infinity) return;
-        const remaining = audioEl.duration - audioEl.currentTime;
-        // schedule next when remaining <= CROSSFADE_SECS and haven't scheduled yet
-        if (remaining <= CROSSFADE_SECS && !audioEl._nextScheduled) {
-          audioEl._nextScheduled = true;
-          const nextIndex = (currentIndex + 1) % PLAYLIST.length;
-          startTrackByIndex(nextIndex, true); // crossfade into next
-        }
-      };
-      audioEl.addEventListener('timeupdate', onTime);
-      // cleanup flag on ended
-      audioEl.addEventListener('ended', () => { audioEl._nextScheduled = false; });
-    }
-
-    // update elapsed display (MM:SS) - only when drawer visible
-    function formatMMSS(sec) {
-      const s = Math.floor(sec % 60);
-      const m = Math.floor(sec / 60);
-      return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-    }
-    function updateElapsedDisplay() {
-      const el = document.getElementById('now-playing-time');
-      if (!el) return;
-      try {
-        const a = getActiveAudio();
-        const now = a && typeof a.currentTime === 'number' ? a.currentTime : 0;
-        el.textContent = formatMMSS(now || 0);
-      } catch(e) {}
-    }
-    function startElapsedUpdater() {
-      stopElapsedUpdater();
-      elapsedInterval = setInterval(() => {
-        const drawer = document.getElementById('radio-drawer');
-        if (drawer && drawer.style.display !== 'none') updateElapsedDisplay();
-      }, 500);
-    }
-    function stopElapsedUpdater() {
-      if (elapsedInterval) { clearInterval(elapsedInterval); elapsedInterval = null; }
-    }
-
-    // start playing a track by index
-    // if isAutoCrossfade === true -> called by scheduler, do a crossfade
-    function startTrackByIndex(index, isAutoCrossfade=false) {
-      index = index % PLAYLIST.length;
-      const next = PLAYLIST[index];
-      const active = getActiveAudio();
-      const inactive = getInactiveAudio();
-
-      // prepare inactive audio with next track
-      inactive.src = next.url;
-      inactive.load();
-      inactive.volume = 0;
-      inactive.preload = 'auto';
-
-      // try to play inactive (user gesture needed if first play)
-      const tryPlayInactive = async () => {
-        try {
-          await inactive.play();
-        } catch (e) {
-          // playback blocked until user gesture — show center resume etc.
-          console.warn('playback blocked until gesture', e);
-        }
-      };
-      tryPlayInactive();
-
-      // if crossfading (either scheduled or forced), overlap volumes
-      const crossfade = CROSSFADE_SECS * 1000;
-      // Start crossfade immediately
-      fadeAudioTo(active, 0, crossfade);
-      fadeAudioTo(inactive, FADE_TARGET_VOLUME, crossfade);
-
-      // after crossfade complete, pause old active and swap
-      setTimeout(() => {
-        try { active.pause(); active.currentTime = 0; } catch(e){}
-        // switch active pointer
-        activePlayer = (activePlayer === 'A') ? 'B' : 'A';
-        musicPlaying = true;
-        // update UI state
-        musicToggle.textContent = 'Pause';
-        musicToggle.setAttribute('aria-pressed', 'true');
-        centerResume.style.display = 'none';
-        centerResume.setAttribute('aria-hidden', 'true');
-        musicToggle.style.display = 'block';
-        musicToggle.setAttribute('aria-hidden', 'false');
-        currentIndex = index;
-        populateRadioUI();
-        // attach scheduling to new active
-        attachScheduling(getActiveAudio());
-      }, crossfade + 80);
-
-      // if not crossfade (force immediate switch) — we still used same crossfade logic above
-    }
-
-    // initial start without crossfade (first time)
-    async function startFirstTrack() {
-      const p = CURRENT();
-      const a = getActiveAudio();
-      a.src = p.url;
-      a.preload = 'auto';
-      a.volume = 0;
-      try {
-        await a.play();
-        // fade volume in to target
-        fadeAudioTo(a, FADE_TARGET_VOLUME, FADE_IN_MS);
-        musicPlaying = true;
-        musicToggle.textContent = 'Pause';
-        musicToggle.setAttribute('aria-pressed', 'true');
-        musicToggle.style.display = 'block';
-        musicToggle.setAttribute('aria-hidden', 'false');
-        populateRadioUI();
-        attachScheduling(a);
-      } catch (e) {
-        console.warn('Autoplay blocked until gesture', e);
-      }
-    }
->>>>>>> 297780f1060b6ab06f215dfe2738d66e15ca4d3b
-
-    // --- Populate radio UI ---
-    function populateRadioUI() {
-      const list = document.getElementById('radio-list');
-      if (!list) return;
-      list.innerHTML = '';
-      PLAYLIST.forEach((item, idx) => {
-        const node = document.createElement('div');
-        node.className = 'radio-item' + (idx === currentIndex ? ' radio-current' : '');
-        node.setAttribute('role','button');
-        node.setAttribute('tabindex','0');
-        node.innerHTML = `
-          <div style="flex:1">
-            <div class="title">${item.artist} — ${item.title}</div>
-            <div class="meta">${idx === currentIndex ? 'Now playing' : 'Upcoming'}</div>
-          </div>
-        `;
-        node.addEventListener('click', () => startTrackByIndex(idx));
-        node.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startTrackByIndex(idx); }});
-        list.appendChild(node);
-      });
-
-      try {
-        const nowLabel = document.getElementById('now-playing-time');
-        if (nowLabel) nowLabel.setAttribute('aria-label', `Now playing: ${PLAYLIST[currentIndex].artist} ${PLAYLIST[currentIndex].title}`);
-      } catch (e) {}
     }
     populateRadioUI();
 
-    // --- helpers: format time ---
+    // YouTube API helper: once API loads, this callback is called by their script
+    function onYouTubeIframeAPIReady() {
+      const t = CURRENT();
+      player = new YT.Player('youtube-music', {
+        height: '0',
+        width: '0',
+        videoId: t.youtubeId,
+        playerVars: {
+          autoplay: 0,
+          start: t.start || 0,
+          loop: 0, // we handle playlist loop ourselves
+          controls: 0,
+          modestbranding: 1,
+          rel: 0,
+          disablekb: 1,
+          playsinline: 1
+        },
+        events: {
+          onReady: (e) => {
+            playerReady = true;
+            try { player.setVolume(0); } catch(e){}
+            setIframeAllowAttributes();
+            // if user already clicked start (rare), begin playing muted so gesture satisfied
+            if (userClickedStart && !musicPlaying) {
+              try { player.playVideo(); } catch(e){ console.warn('play muted after ready failed', e); }
+            }
+          },
+          onStateChange: onPlayerStateChange
+        }
+      });
+    }
+
+    // Make iframe allow attributes friendly
+    function setIframeAllowAttributes() {
+      try {
+        if (!player || !player.getIframe) return;
+        const iframe = player.getIframe();
+        if (!iframe) return;
+        iframe.setAttribute('allow', 'autoplay; encrypted-media; accelerometer; gyroscope; picture-in-picture; clipboard-write; web-share');
+        iframe.setAttribute('playsinline', '1');
+      } catch (e) { console.warn('Could not set iframe allow attributes:', e); }
+    }
+
+    // Player state change handler (detect ended -> advance playlist)
+    function onPlayerStateChange(event) {
+      const state = event.data;
+      // 0 = ended
+      if (state === YT.PlayerState.ENDED) {
+        // advance to next track
+        currentIndex = (currentIndex + 1) % PLAYLIST.length;
+        const next = CURRENT();
+        try {
+          player.loadVideoById({ videoId: next.youtubeId, startSeconds: next.start || 0 });
+        } catch (e) {
+          console.warn('loadVideoById failed', e);
+        }
+        // set volume to 0, play, then fade
+        try { player.setVolume(0); player.playVideo(); } catch (e) {}
+        setTimeout(()=>{ fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); }, 120);
+        // update UI
+        populateRadioUI();
+      }
+      // if playing, start elapsed timer
+      if (state === YT.PlayerState.PLAYING) {
+        startElapsedUpdater();
+      } else {
+        stopElapsedUpdater();
+      }
+    }
+
+    // Fade utility (smoothly change volume to target over duration)
+    function fadeTo(targetVolume, duration = FADE_IN_MS) {
+      if (!player || typeof player.setVolume !== 'function') return;
+      let current = 0;
+      try { current = player.getVolume ? player.getVolume() : 0; } catch(e){ current = 0; }
+      const steps = Math.max(1, Math.round(duration / 50));
+      const diff = targetVolume - current;
+      let stepIndex = 0;
+      const interval = setInterval(() => {
+        stepIndex++;
+        const next = current + (diff * (stepIndex / steps));
+        try { player.setVolume(Math.round(Math.max(0, Math.min(100, next)))); } catch(e){}
+        if (stepIndex >= steps) clearInterval(interval);
+      }, 50);
+    }
+
+    // Elapsed updater (shows MM:SS only while drawer open)
     function formatMMSS(sec) {
       const s = Math.floor(sec % 60);
       const m = Math.floor(sec / 60);
       return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
     }
-
-    // --- elapsed timer ---
     function updateElapsedDisplay() {
       const el = document.getElementById('now-playing-time');
-      if (!el) return;
+      if (!el || !player || !player.getCurrentTime) return;
       try {
-        const now = getActiveAudio().currentTime || 0;
+        const now = player.getCurrentTime ? player.getCurrentTime() : 0;
         el.textContent = formatMMSS(now);
-      } catch (e) {}
+      } catch(e) { /* ignore */ }
     }
     function startElapsedUpdater() {
       stopElapsedUpdater();
       elapsedInterval = setInterval(() => {
-        if (radioDrawer && radioDrawer.style.display !== 'none') {
+        // only update when radio drawer visible
+        const drawer = document.getElementById('radio-drawer');
+        if (drawer && drawer.style.display !== 'none') {
           updateElapsedDisplay();
         }
       }, 500);
@@ -976,271 +783,96 @@
       if (elapsedInterval) { clearInterval(elapsedInterval); elapsedInterval = null; }
     }
 
-    // --- Fetch file -> blob -> objectURL (returns true/false) ---
-    async function loadTrackIntoAudioByIndex(idx, audioEl) {
-      const file = PLAYLIST[idx].file;
-      const url = GITHUB_BASE + encodeURIComponent(file);
-      try {
-        const resp = await fetch(url, { mode: 'cors' });
-        if (!resp.ok) throw new Error('Fetch failed: ' + resp.status);
-        const blob = await resp.blob();
-        // revoke previous if any
-        if (audioEl._objectUrl) {
-          try { URL.revokeObjectURL(audioEl._objectUrl); } catch(e) {}
-          audioEl._objectUrl = null;
-        }
-        const objUrl = URL.createObjectURL(blob);
-        audioEl._objectUrl = objUrl;
-        audioEl.src = objUrl;
-        return true;
-      } catch (err) {
-        console.warn('loadTrackIntoAudioByIndex error', err);
-        return false;
-      }
-    }
+    // DOM refs
+    const startBtn = document.getElementById('start-experience-btn');
+    const musicToggle = document.getElementById('music-toggle');
+    const radioButton = document.getElementById('radio-button');
+    const radioDrawer = document.getElementById('radio-drawer');
+    const centerResume = document.getElementById('music-resume-center');
 
-    // --- fade helper for audio elements (targetVolume 0..1) ---
-    function fadeTo(targetVolume, duration = FADE_IN_MS) {
-      // fade active audio only
-      const audio = getActiveAudio();
-      if (!audio) return;
-      if (audio._fadeInterval) clearInterval(audio._fadeInterval);
-      const start = typeof audio.volume === 'number' ? audio.volume : 0;
-      const steps = Math.max(1, Math.round(duration / 50));
-      const diff = targetVolume - start;
-      let i = 0;
-      audio._fadeInterval = setInterval(() => {
-        i++;
-        audio.volume = Math.max(0, Math.min(1, start + diff * (i/steps)));
-        if (i >= steps) {
-          clearInterval(audio._fadeInterval);
-          audio._fadeInterval = null;
-          audio.volume = targetVolume;
-        }
-      }, 50);
-    }
-
-    // fade out and pause active audio
-    function fadeOutAndPause(duration = 600) {
-      const audio = getActiveAudio();
-      if (!audio) return;
-      if (audio._fadeInterval) clearInterval(audio._fadeInterval);
-      const start = typeof audio.volume === 'number' ? audio.volume : 0;
-      const steps = Math.max(1, Math.round(duration / 50));
-      let i = 0;
-      const diff = 0 - start;
-      audio._fadeInterval = setInterval(() => {
-        i++;
-        audio.volume = Math.max(0, Math.min(1, start + diff * (i/steps)));
-        if (i >= steps) {
-          clearInterval(audio._fadeInterval);
-          audio._fadeInterval = null;
-          try { audio.pause(); } catch(e) {}
-          audio.volume = 0;
-        }
-      }, 50);
-    }
-
-    // --- play given index (handles loading into inactive audio, crossfade) ---
-    async function startTrackByIndex(idx) {
-      if (idx < 0 || idx >= PLAYLIST.length) return;
-      // if already playing the same track, just ensure UI
-      if (idx === currentIndex && musicPlaying) {
-        // already playing
-        populateRadioUI();
-        return;
-      }
-
-      // prepare inactive audio with requested track
-      const inactive = getInactiveAudio();
-      const success = await loadTrackIntoAudioByIndex(idx, inactive);
-      if (!success) {
-        console.warn('Failed to load track at index', idx);
-        return;
-      }
-
-      // set start conditions
-      inactive.volume = 0;
-      inactive.currentTime = 0;
-
-      try {
-        // attempt to play inactive (this must be allowed by gesture in many cases)
-        const playPromise = inactive.play();
-        if (playPromise && typeof playPromise.then === 'function') {
-          await playPromise.catch(err => { console.warn('play rejected', err); throw err; });
-        }
-      } catch (err) {
-        // could be autoplay policy; show center resume fallback
-        console.warn('Play failed, showing resume center', err);
-        centerResume.style.display = 'block';
-        centerResume.setAttribute('aria-hidden', 'false');
-        musicToggle.style.display = 'none';
-        musicToggle.setAttribute('aria-hidden', 'true');
-        return;
-      }
-
-      // crossfade: fade inactive up, active down
-      const fadeDuration = 1200;
-      // fade up inactive to target
-      const target = FADE_TARGET_VOLUME;
-      (function crossfade() {
-        // ensure active exists and fade down
-        const active = getActiveAudio();
-        if (active && !active.paused) {
-          // fade active down and pause at end
-          const startActive = active.volume || 0;
-          const steps = Math.max(1, Math.round(fadeDuration / 50));
-          let i = 0;
-          if (active._fadeInterval) clearInterval(active._fadeInterval);
-          active._fadeInterval = setInterval(() => {
-            i++;
-            active.volume = Math.max(0, startActive * (1 - i/steps));
-            if (i >= steps) {
-              clearInterval(active._fadeInterval);
-              active._fadeInterval = null;
-              try { active.pause(); } catch(e) {}
-              active.volume = 0;
-            }
-          }, 50);
-        }
-
-        // fade inactive up
-        const startInactive = inactive.volume || 0;
-        let j = 0;
-        if (inactive._fadeInterval) clearInterval(inactive._fadeInterval);
-        inactive._fadeInterval = setInterval(() => {
-          j++;
-          inactive.volume = Math.max(0, Math.min(target, startInactive + (target - startInactive) * (j/Math.max(1,Math.round(fadeDuration/50)))));
-          if (j >= Math.round(fadeDuration/50)) {
-            clearInterval(inactive._fadeInterval);
-            inactive._fadeInterval = null;
-            inactive.volume = target;
-          }
-        }, 50);
-
-        // swap active pointer
-        flipActive();
-        currentIndex = idx;
-        populateRadioUI();
-        musicPlaying = true;
-        // show toggle
-        musicToggle.style.display = 'block';
-        musicToggle.setAttribute('aria-hidden','false');
-        musicToggle.textContent = 'Pause';
-        musicToggle.setAttribute('aria-pressed','true');
-
-        // start elapsed timer if drawer open
-        startElapsedUpdater();
-      })();
-    }
-
-    // --- advance to next track on ended ---
-    function attachEndedHandlers() {
-      [audioA, audioB].forEach(a => {
-        a.onended = () => {
-          // advance index
-          currentIndex = (currentIndex + 1) % PLAYLIST.length;
-          // start next track by loading into inactive and crossfading
-          startTrackByIndex(currentIndex).catch(e => console.warn('startTrackByIndex error', e));
-        };
-        a.onplay = () => {
-          // ensure UI reflects playing
-          musicPlaying = true;
-          musicToggle.style.display = 'block';
-          musicToggle.setAttribute('aria-hidden','false');
-          musicToggle.textContent = 'Pause';
-          musicToggle.setAttribute('aria-pressed','true');
-        };
-        a.onpause = () => {
-          // UI will reflect pause when paused intentionally
-        };
-      });
-    }
-    attachEndedHandlers();
-
-    // --- Start Experience click handler (user gesture required for playback) ---
+    // If session already saw intro (sessionStorage), do not show intro in this tab
     (function checkSessionIntro() {
       try {
         if (sessionStorage.getItem('ravescore_intro_seen') === 'true') {
           const intro = document.getElementById('intro-screen');
           if (intro && intro.parentNode) intro.parentNode.removeChild(intro);
-<<<<<<< HEAD
-=======
-          // show music toggle control (but do not start audio automatically)
->>>>>>> 297780f1060b6ab06f215dfe2738d66e15ca4d3b
-          musicToggle.style.display = 'block';
-          musicToggle.setAttribute('aria-hidden', 'false');
         }
-      } catch (e) {}
+      } catch(e){}
     })();
 
-    startBtn.addEventListener('click', async function () {
+    // Start Experience click: must be user gesture to allow autoplay
+    startBtn.addEventListener('click', function () {
       userClickedStart = true;
       try { sessionStorage.setItem('ravescore_intro_seen','true'); } catch(e){}
-<<<<<<< HEAD
 
-=======
->>>>>>> 297780f1060b6ab06f215dfe2738d66e15ca4d3b
+      // If player is ready, start playback muted (counts as user gesture)
+      if (playerReady && player) {
+        try {
+          player.setVolume(0);
+          setIframeAllowAttributes();
+          player.playVideo();
+          musicPlaying = true;
+        } catch (err) { console.warn('player.playVideo() failed on click:', err); }
+      }
+
       // animate logo burst
       const introLogo = document.getElementById('intro-logo');
       introLogo.classList.add('animate-burst-logo');
 
-<<<<<<< HEAD
-      // preload first track into inactive audio and attempt to play muted (gesture)
-      try {
-        const inactive = getInactiveAudio();
-        await loadTrackIntoAudioByIndex(currentIndex, inactive);
-        inactive.volume = 0;
-        try {
-          const p = inactive.play();
-          if (p && typeof p.then === 'function') {
-            await p.catch(err => { console.warn('play rejected at start', err); throw err; });
-          }
-          // fade in after intro
-          setTimeout(()=>{ fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); }, 120);
-          // mark playing and swap active
-          flipActive();
-          musicPlaying = true;
-        } catch (err) {
-          console.warn('Initial play attempt failed', err);
-          // show resume center if autoplay still blocked
-          centerResume.style.display = 'block';
-          centerResume.setAttribute('aria-hidden','false');
-        }
-      } catch (err) {
-        console.warn('Failed to preload first track', err);
-      }
-
-      // show single toggle control (visibility will be toggled if play failed)
-      musicToggle.style.display = musicPlaying ? 'block' : musicToggle.style.display;
-      musicToggle.setAttribute('aria-hidden', musicPlaying ? 'false' : 'true');
-      musicToggle.textContent = musicPlaying ? 'Pause' : 'Resume';
-      musicToggle.setAttribute('aria-pressed', musicPlaying ? 'true' : 'false');
-
-      // restore scrolling unless update popup present
-      if (!document.getElementById('rs-update-overlay')) {
-        document.documentElement.style.overflow = '';
-        document.body.style.overflow = '';
-      }
-=======
       // keep intro for burst duration, then fade and reveal site
       setTimeout(() => {
         const intro = document.getElementById('intro-screen');
         if (intro) intro.style.opacity = '0';
 
-        // start audio now (user gesture satisfied)
-        startFirstTrack();
->>>>>>> 297780f1060b6ab06f215dfe2738d66e15ca4d3b
+        // start or fade-in audio right before intro removed
+        if (player && musicPlaying) {
+          fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS);
+        } else if (player && !musicPlaying) {
+          try {
+            player.setVolume(0);
+            player.playVideo();
+            musicPlaying = true;
+            fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS);
+          } catch (e) {
+            // poll for readiness then start
+            const p = setInterval(() => {
+              if (playerReady && player) {
+                try { player.setVolume(0); player.playVideo(); musicPlaying=true; fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(p); } catch(err) { console.warn(err); }
+              }
+            }, 250);
+          }
+        } else {
+          // wait for player creation
+          const p = setInterval(()=> {
+            if (playerReady && player) {
+              try { player.setVolume(0); player.playVideo(); musicPlaying=true; fadeTo(FADE_TARGET_VOLUME, FADE_IN_MS); clearInterval(p); } catch(e){ console.warn(e); }
+            }
+          }, 300);
+        }
 
-      // remove intro after burst
-      setTimeout(()=>{ const i = document.getElementById('intro-screen'); if (i && i.parentNode) i.parentNode.removeChild(i); }, 800);
-      populateRadioUI();
+        // show single toggle control
+        musicToggle.style.display = 'block';
+        musicToggle.setAttribute('aria-hidden', 'false');
+
+        // set label
+        musicToggle.textContent = musicPlaying ? 'Pause' : 'Resume';
+        musicToggle.setAttribute('aria-pressed', musicPlaying ? 'true' : 'false');
+
+        // restore scrolling unless update popup present
+        if (!document.getElementById('rs-update-overlay')) {
+          document.documentElement.style.overflow = '';
+          document.body.style.overflow = '';
+        }
+
+        // remove intro after fade completes
+        setTimeout(()=>{ const i = document.getElementById('intro-screen'); if (i && i.parentNode) i.parentNode.removeChild(i); }, 800);
+      }, INTRO_BURST_MS);
     });
 
-    // Toggle Pause/Resume
+    // Toggle Pause/Resume (fade)
     musicToggle.addEventListener('click', function () {
-<<<<<<< HEAD
-      if (!getActiveAudio()) {
+      if (!playerReady || !player) {
+        // toggle state for UI while waiting
         musicPlaying = !musicPlaying;
         musicToggle.textContent = musicPlaying ? 'Pause' : 'Resume';
         musicToggle.setAttribute('aria-pressed', musicPlaying ? 'true' : 'false');
@@ -1248,65 +880,38 @@
       }
 
       if (musicPlaying) {
-        // fade out and pause
-        fadeOutAndPause(600);
-=======
-      const a = getActiveAudio();
-      const b = getInactiveAudio();
-      if (!a) return;
-
-      if (musicPlaying) {
-        // fade out and pause
-        fadeAudioTo(a, 0, 600);
-        setTimeout(()=>{ try { a.pause(); b.pause(); } catch(e){} }, 650);
->>>>>>> 297780f1060b6ab06f215dfe2738d66e15ca4d3b
+        // fade out and then pause (keep video paused to avoid background data)
+        fadeTo(0, 600);
+        setTimeout(()=>{ try { player.pauseVideo(); } catch(e){} }, 650);
         musicPlaying = false;
         musicToggle.textContent = 'Resume';
-        musicToggle.setAttribute('aria-pressed','false');
+        musicToggle.setAttribute('aria-pressed', 'false');
         centerResume.style.display = 'block';
-        centerResume.setAttribute('aria-hidden','false');
+        centerResume.setAttribute('aria-hidden', 'false');
       } else {
-<<<<<<< HEAD
         // resume
-        try {
-          // play active audio
-          const a = getActiveAudio();
-          a.play().catch(err => console.warn('resume play rejected', err));
-          setTimeout(()=>{ fadeTo(FADE_TARGET_VOLUME, 800); }, 80);
-        } catch (e) { console.warn(e); }
-=======
-        // resume: play active and fade in
-        try {
-          a.play().catch(()=>{});
-          fadeAudioTo(a, FADE_TARGET_VOLUME, 800);
-        } catch(e){}
->>>>>>> 297780f1060b6ab06f215dfe2738d66e15ca4d3b
+        try { player.playVideo(); } catch(e){ console.warn(e); }
+        setTimeout(()=>{ fadeTo(FADE_TARGET_VOLUME, 800); }, 80);
         musicPlaying = true;
         musicToggle.textContent = 'Pause';
-        musicToggle.setAttribute('aria-pressed','true');
+        musicToggle.setAttribute('aria-pressed', 'true');
         centerResume.style.display = 'none';
-        centerResume.setAttribute('aria-hidden','true');
+        centerResume.setAttribute('aria-hidden', 'true');
       }
     });
 
     // center resume fallback
     centerResume.addEventListener('click', function () {
-      const a = getActiveAudio();
-      if (!a) return;
-<<<<<<< HEAD
-      a.play().catch(err => console.warn('center resume play rejected', err));
+      if (!player) return;
+      try { player.playVideo(); } catch(e){ console.warn(e); }
       setTimeout(()=>{ fadeTo(FADE_TARGET_VOLUME, 800); }, 80);
-=======
-      try { a.play(); } catch(e){ console.warn(e); }
-      setTimeout(()=>{ fadeAudioTo(a, FADE_TARGET_VOLUME, 800); }, 80);
->>>>>>> 297780f1060b6ab06f215dfe2738d66e15ca4d3b
       musicPlaying = true;
       musicToggle.textContent = 'Pause';
-      musicToggle.setAttribute('aria-pressed','true');
+      musicToggle.setAttribute('aria-pressed', 'true');
       centerResume.style.display = 'none';
-      centerResume.setAttribute('aria-hidden','true');
+      centerResume.setAttribute('aria-hidden', 'true');
       musicToggle.style.display = 'block';
-      musicToggle.setAttribute('aria-hidden','false');
+      musicToggle.setAttribute('aria-hidden', 'false');
     });
 
     // Radio drawer toggle
@@ -1318,11 +923,14 @@
         radioButton.setAttribute('aria-expanded', 'false');
         stopElapsedUpdater();
       } else {
+        // update now-playing display immediately
         populateRadioUI();
+        // reset elapsed display
         updateElapsedDisplay();
         radioDrawer.style.display = 'block';
         radioDrawer.setAttribute('aria-hidden', 'false');
         radioButton.setAttribute('aria-expanded', 'true');
+        // start interval to update time
         startElapsedUpdater();
       }
     });
@@ -1333,24 +941,14 @@
         document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
       }
+      // if player not created yet, leave as-is. onYouTubeIframeAPIReady will init.
     });
 
-<<<<<<< HEAD
-    // Expose startTrackByIndex globally for debugging if needed
-    window.startTrackByIndex = startTrackByIndex;
-
-    // initialize radio UI
-    (function initRadioUI(){ populateRadioUI(); })();
-=======
-    // Ensure radio UI shows Now Playing initially
-    (function initRadioUI(){ populateRadioUI(); })();
-
-    // Expose small debug function (optional)
-    window.__ravescore_audio_debug = { audioA, audioB, getActiveAudio, getInactiveAudio };
->>>>>>> 297780f1060b6ab06f215dfe2738d66e15ca4d3b
+    // Expose YouTube callback to window
+    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
   </script>
 
-  <!-- FIRESTORE ADMIN PANEL SCRIPT (keeps your original firebase config + logic) -->
+  <!-- FIRESTORE ADMIN PANEL SCRIPT -->
   <script>
     // --- FIREBASE CONFIG: your provided values ---
     const firebaseConfig = {
@@ -1366,11 +964,7 @@
 
     // Initialize Firebase app + Firestore (compat)
     try {
-      if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      } else {
-        // reuse existing
-      }
+      firebase.initializeApp(firebaseConfig);
     } catch (e) {
       console.warn('Firebase init error (maybe already initialized):', e);
     }
@@ -1455,11 +1049,11 @@
         // optimistic UI
         maintenanceStatusText.textContent = !current ? 'ON' : 'OFF';
 
-        // fade audio accordingly (0 = off, FADE_TARGET_VOLUME = on)
+        // fade audio accordingly
         if (!current) {
           try { fadeTo(0, 1200); } catch(e){}
         } else {
-          try { if (musicPlaying) fadeTo(FADE_TARGET_VOLUME * 100, 1200); } catch(e){}
+          try { if (musicPlaying) fadeTo(FADE_TARGET_VOLUME, 1200); } catch(e){}
         }
       } catch (e) {
         console.warn('Toggle maintenance failed', e);
@@ -1470,9 +1064,9 @@
     // Realtime listener: when Firestore value changes, show/hide overlay for all users
     if (db) {
       try {
-        // Keep overlay hidden until snapshot yields a result to avoid flicker
         db.collection('settings').doc('site').onSnapshot((doc) => {
           const data = doc.exists ? doc.data() : null;
+          // only show overlay if doc exists AND maintenanceMode === true
           const isMaintenance = data && data.maintenanceMode === true;
 
           if (isMaintenance) {
@@ -1484,13 +1078,11 @@
             overlay.style.display = 'none';
             overlay.setAttribute('aria-hidden', 'true');
             // fade audio back in if user previously started playback
-            try { if (musicPlaying) fadeTo(FADE_TARGET_VOLUME * 100, 1000); } catch(e){}
+            try { if (musicPlaying) fadeTo(FADE_TARGET_VOLUME, 1000); } catch(e){}
           }
 
           // update admin UI status if panel visible
           maintenanceStatusText.textContent = isMaintenance ? 'ON' : 'OFF';
-        }, (err) => {
-          console.warn('Firestore snapshot listen failed', err);
         });
       } catch (e) {
         console.warn('Firestore snapshot listen failed', e);
@@ -1503,7 +1095,12 @@
         adminPanel.style.display = 'none';
       }
     });
+
+    // Ensure radio UI shows Now Playing initially
+    (function initRadioUI(){ populateRadioUI(); })();
   </script>
 
+  <!-- hidden div for youtube player -->
+  <div id="youtube-music"></div>
 </body>
 </html>
