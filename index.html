@@ -47,7 +47,6 @@
     body.hovering #cursor-reticle { width: 50px; height: 50px; border-color: var(--n-pink); transform: rotate(45deg); }
     body.hovering #cursor-reticle::after { background: var(--n-cyan); transform: scale(1.5); }
 
-    /* HUD: TOP BAR */
     #hud-top {
         position: fixed; top: 0; left: 0; right: 0; z-index: 5000;
         display: flex; justify-content: space-between; align-items: center;
@@ -110,7 +109,6 @@
     #site-canvas { padding-left: 70px; opacity: 0; transition: opacity 2s; }
     body.ready #site-canvas { opacity: 1; }
 
-    /* GLITCH EFFECT */
     .glitch-text { animation: glitch 0.3s linear infinite; }
     @keyframes glitch {
         0% { transform: translate(0) }
@@ -453,6 +451,7 @@
 
     document.querySelectorAll('.slide-up, section').forEach(el => observer.observe(el));
   </script>
+<<<<<<< HEAD
 =======
 <script>
 (function () {
